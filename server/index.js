@@ -121,30 +121,30 @@ app.get('/project/:projectId/overview',requiresAuth(), async (req, res) => {
     // Use tagged template literals to query the database
     const result = await sql`
     SELECT 
-    p.ProjectId,
-    p.ProjectName,
-    p.ProjectDescription,
-    p.ProjectStatus,
-    p.ProjectTarget,
-    p.ProjectStart,
-    m.MilestoneId,
-    m.MilestoneName,
-    m.MilestoneTarget,
-    l.LinkId,
-    l.InfoLink
+    p."ProjectId",
+    p."ProjectName",
+    p."ProjectDescription",
+    p."ProjectStatus",
+    p."ProjectTarget",
+    p."ProjectStart",
+    m."MilestoneId",
+    m."MilestoneName",
+    m."MilestoneTarget",
+    l."LinkId",
+    l."InfoLink"
     FROM 
-        User u
+        "User" u
     JOIN 
-        Member mb ON u.UserId = mb.UserId
+        "Member" mb ON u."UserId" = mb."UserId"
     JOIN 
-        Project p ON mb.ProjectId = p.ProjectId
+        "Project" p ON mb."ProjectId" = p."ProjectId"
     LEFT JOIN 
-        Milestone m ON p.ProjectId = m.ProjectId
+        "Milestone" m ON p."ProjectId" = m."ProjectId"
     LEFT JOIN 
-        Link l ON p.ProjectId = l.ProjectId
+        "Link" l ON p."ProjectId" = l."ProjectId"
     WHERE 
-        u.Email = ${email}
-        AND p.ProjectId = ${projectId};
+        u."Email" = ${email}
+        AND p."ProjectId" = ${projectId};
     `;
     res.json(result);
   } catch (err) {
