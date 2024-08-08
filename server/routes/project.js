@@ -3,6 +3,7 @@ const router = express.Router();
 const { requiresAuth } = require('express-openid-connect');
 const insertIntoUser = require('../middlewares/insertIntoUser');
 const sql = require('../dbConfig');
+const getRandomString = require('../utils/randomString');
 
 // Get all projects
 router.get('/all', requiresAuth(), insertIntoUser, async (req, res) => {
@@ -27,6 +28,8 @@ router.post('/createproject', requiresAuth(), async (req, res) => {
   const email = req.oidc.user.email;
   const { ProjectName } = req.body;
   const memberRole = 'Admin';
+  const randomString = getRandomString();
+
   try {
     const getUserId = await sql`
       SELECT "UserId"
@@ -43,6 +46,11 @@ router.post('/createproject', requiresAuth(), async (req, res) => {
     `;
     const projectId = insertIntoProject[0]?.ProjectId;
     if (!projectId) throw new Error('Project insertion failed');
+    
+    await sql`
+     INSERT INTO "DNS" ("dnsId", "dbId", "url")
+     VALUES (uuid_generate_v4(), ${projectId}, ${randomString});
+    `;
 
     await sql`
       INSERT INTO "Member" ("MemberId", "UserId", "ProjectId", "MemberRole")
