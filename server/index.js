@@ -7,9 +7,7 @@ const auth0Config = require('./auth0Config');
 const sql = require('./dbConfig');
 const insertIntoUser = require('./middlewares/insertIntoUser');
 
-// *********************************
-// invite route likhna bacha hua hai
-//***********************************
+
 
 app.use(express.json());
 
@@ -19,7 +17,9 @@ app.use(auth(auth0Config));
 
 // landing page (get request)
 app.get('/', (req, res) => {
-  res.send(req.oidc.isAuthenticated() ? 'Logged in' : 'Logged out');
+  if(req.oidc.isAuthenticated()){
+    res.redirect('/project/all')
+  }
 
 });
 
@@ -62,13 +62,14 @@ app.post('/createproject',requiresAuth(), async (req, res) => {
   const ProjectName = req.body.ProjectName;
   const memberRole = 'Admin';
 
-
+  
   try {
     const getUserId = await sql`
     SELECT "UserId"
     FROM "User"
     WHERE "Email" = ${email};
     `;
+    
 
     const userId = getUserId[0]?.UserId;
     if (!userId) {
@@ -83,6 +84,7 @@ app.post('/createproject',requiresAuth(), async (req, res) => {
     )
     RETURNING "ProjectId";
     `;
+      
 
     const projectId = insertIntoProject[0]?.ProjectId;
     if (!projectId) {
@@ -100,6 +102,8 @@ app.post('/createproject',requiresAuth(), async (req, res) => {
     `;
 
     console.log('Member inserted successfully');
+
+    res.redirect(`/project/${projectId}/overview`);
 
   } catch (err) {
     console.error('Error executing query', err);
@@ -185,13 +189,12 @@ app.get('/project/:projectId/issues',requiresAuth(), async (req, res) => {
         u."Email" = ${email}
         AND p."ProjectId" = ${projectId};
     `;
-    res.json(result);
+
+    res.status(200).json(result);
   } catch (err) {
     console.error('Error executing query', err);
     res.status(500).json({ error: 'Internal Server Error' });
   }
-
-  res.json(req.oidc.isAuthenticated() ? 'Logged in' : 'Logged out');
 
 });
 
@@ -202,7 +205,6 @@ app.get('/project/:projectId/issue/:issueId',requiresAuth(), async (req, res) =>
   const email = req.oidc.user.email; //used for sql query only
   const projectId = req.params.projectId;
   const issueId = req.params.issueId;
-
 
   try {
     const result = await sql`
@@ -242,13 +244,14 @@ app.get('/project/:projectId/issue/:issueId',requiresAuth(), async (req, res) =>
         AND p."ProjectId" = ${projectId}
         AND i."IssueId" = ${issueId};
     `;
-    res.json(result);
+
+    res.status(200).json(result);
   } catch (err) {
     console.error('Error executing query', err);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 
-  res.json(req.oidc.isAuthenticated() ? 'Logged in' : 'Logged out');
+
 
 });
 
@@ -259,9 +262,11 @@ app.post('/project/:projectId/addmember',requiresAuth(), async (req, res) => {
   const inviterEmail = req.oidc.user.email; //used for sql query only
   const projectId = req.params.projectId;
   const inviteeEmail = req.body.inviteeEmail;
+  const invitedForRole = req.body.invitedForRole || "Guest"
   
+
   try {
-    const inviterMemberIdMemberId = await sql`
+    const inviterMember = await sql`
     SELECT m."MemberId"
     FROM "Member" m
     JOIN "User" u ON m."UserId" = u."UserId"
@@ -269,30 +274,34 @@ app.post('/project/:projectId/addmember',requiresAuth(), async (req, res) => {
     AND m."ProjectId" = ${projectId};
     `;
 
+    const inviterMemberId = inviterMember[0]?.MemberId;
+
     if (inviterMemberId.length === 0) {
       throw new Error('Member not found');
     }
+    
 
-
+    console.log("2")
     const insertIntoInvites = await sql`
-      INSERT INTO "Invites" ("InvitesId", "InvitedBy", "InvitedToProjectId", "InvitedEmail")
+      INSERT INTO "Invites" ("InvitesId", "InvitedBy", "InvitedToProjectId", "InvitedEmail", "InvitedForRole")
       VALUES (
           uuid_generate_v4(),
           ${inviterMemberId},
           ${projectId},
-          ${inviteeEmail}
-      );
+          ${inviteeEmail},
+          ${invitedForRole}
+      )
+          RETURNING "InvitesId"
     `;
-
-    if (insertIntoInvites.length === 0) {
-      throw new Error('Member not found');
-    }
+  
+      console.log(insertIntoInvites)
     //yaha
     //    email
     //         ka 
     //           logic
     //                likhna
     //                      hai
+
     res.status(200).json({ success: 'invite sent' });
 
   } catch (err) {
@@ -300,11 +309,53 @@ app.post('/project/:projectId/addmember',requiresAuth(), async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 
-  res.json(req.oidc.isAuthenticated() ? 'Logged in' : 'Logged out');
-
 });
 
 
+// (/invite/:inviteId) used to check the invited email id's authenticity
+app.get('/invite/:inviteId', requiresAuth(), insertIntoUser, async (req, res)=> {
+  const inviteId = req.params.inviteId;
+  const email = req.oidc.user.email;
+  console.log("1")
+  try{
+    const EmailInInvitesTable = await sql `
+    SELECT "InvitedEmail", "InvitedForRole", "InvitedToProjectId"
+    FROM "Invites"
+    WHERE "InvitesId" = ${inviteId};
+    `
+   if(EmailInInvitesTable[0]?.InvitedEmail === email){
+    console.log("2")
+    const invitedForRole = EmailInInvitesTable[0]?.InvitedForRole;
+    const projectId = EmailInInvitesTable[0]?.InvitedToProjectId;
+
+    const getUserId = await sql `
+    Select "UserId" 
+    FROM "User"
+    WHERE "Email" = ${email};
+    `
+
+    const userId = getUserId[0]?.UserId;
+
+    console.log("same");
+    const insertIntoMember = await sql`
+    INSERT INTO "Member" ("MemberId", "UserId", "ProjectId", "MemberRole")
+    VALUES (
+    uuid_generate_v4(),
+    ${userId},
+    ${projectId},
+    ${invitedForRole}
+    )
+     `
+     console.log("3")
+     res.redirect(`/project/${projectId}/overview`)
+   } else {
+    res.redirect(`/project/all`)
+   }
+  } catch (err){
+    console.error(err);
+    res.json(500).send({error: "Internal Server Error"})
+  }
+})
 // app.get('/profile', requiresAuth(), (req, res) => {
 //   res.send(JSON.stringify(req.oidc.user));
 // });
