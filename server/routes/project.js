@@ -4,6 +4,7 @@ const { requiresAuth } = require('express-openid-connect');
 const insertIntoUser = require('../middlewares/insertIntoUser');
 const sql = require('../dbConfig');
 const getRandomString = require('../utils/randomString');
+const getDbId = require('../middlewares/getDbId');
 
 // Get all projects
 router.get('/all', requiresAuth(), insertIntoUser, async (req, res) => {
@@ -47,16 +48,17 @@ router.post('/createproject', requiresAuth(), async (req, res) => {
     const projectId = insertIntoProject[0]?.ProjectId;
     if (!projectId) throw new Error('Project insertion failed');
     
-    await sql`
+    const projectUrlId = await sql`
      INSERT INTO "DNS" ("dnsId", "dbId", "url")
-     VALUES (uuid_generate_v4(), ${projectId}, ${randomString});
+     VALUES (uuid_generate_v4(), ${projectId}, ${randomString})
+     RETURNING "url";
     `;
 
     await sql`
       INSERT INTO "Member" ("MemberId", "UserId", "ProjectId", "MemberRole")
       VALUES (uuid_generate_v4(), ${userId}, ${projectId}, ${memberRole});
     `;
-    res.redirect(`/project/${projectId}/overview`);
+    res.redirect(`/project/${projectUrlId}/overview`);
   } catch (err) {
     console.error('Error executing query', err);
     res.status(500).json({ error: 'Internal Server Error' });
@@ -64,9 +66,10 @@ router.post('/createproject', requiresAuth(), async (req, res) => {
 });
 
 // Get project overview
-router.get('/:projectId/overview', requiresAuth(), async (req, res) => {
+router.get('/:projectUrlId/overview', requiresAuth(), getDbId, async (req, res) => {
   const email = req.oidc.user.email;
-  const { projectId } = req.params;
+  const projectId = req.projectId;
+
   try {
     const result = await sql`
       SELECT 
@@ -89,9 +92,9 @@ router.get('/:projectId/overview', requiresAuth(), async (req, res) => {
 });
 
 // Get project issues
-router.get('/:projectId/issues', requiresAuth(), async (req, res) => {
+router.get('/:projectId/issues', requiresAuth(), getDbId, async (req, res) => {
   const email = req.oidc.user.email;
-  const { projectId } = req.params;
+  const projectId = req.projectId;
   try {
     const result = await sql`
       SELECT 
@@ -112,9 +115,10 @@ router.get('/:projectId/issues', requiresAuth(), async (req, res) => {
 });
 
 // Get specific issue details
-router.get('/:projectId/issue/:issueId', requiresAuth(), async (req, res) => {
+router.get('/:projectId/issue/:issueId', requiresAuth(), getDbId, async (req, res) => {
   const email = req.oidc.user.email;
-  const { projectId, issueId } = req.params;
+  const projectId = req.projectId;
+  const issueId = req.issueId;
   try {
     const result = await sql`
       SELECT 
@@ -139,9 +143,9 @@ router.get('/:projectId/issue/:issueId', requiresAuth(), async (req, res) => {
 });
 
 // Add a new member to a project
-router.post('/:projectId/addmember', requiresAuth(), async (req, res) => {
+router.post('/:projectId/addmember', requiresAuth(), getDbId, async (req, res) => {
   const inviterEmail = req.oidc.user.email;
-  const { projectId } = req.params;
+  const projectId = req.projectId;
   const { inviteeEmail, invitedForRole = 'Guest' } = req.body;
   try {
     const inviterMember = await sql`
