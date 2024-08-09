@@ -17,7 +17,7 @@ const insertIntoUser = async (req, res, next) => {
         next();
     } catch (err) {
         console.error('Insert Into User', err);
-        res.status(500).send('Authriasl;dkfjh');
+        res.status(500).send('Internal Server Error');
     }
   };
   
