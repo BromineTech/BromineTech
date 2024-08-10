@@ -4,7 +4,8 @@ const app = express();
 const port = process.env.PORT || 4000;
 
 const http = require('http');
-const { initializeWebSocketServer } = require('./websockets/socket');
+// const { initializeWebSocketServer } = require('./websockets/socket');
+const { initializeWebSocketServer, broadcastMessageToRouteProjectIssue } = require('./websockets/socket');
 
 
 const auth0Config = require('./auth0Config');

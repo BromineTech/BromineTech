@@ -5,6 +5,7 @@ const insertIntoUser = require('../middlewares/insertIntoUser');
 const sql = require('../dbConfig');
 const getRandomString = require('../utils/randomString');
 const getDbId = require('../middlewares/getDbId');
+const { initializeWebSocketServer, broadcastMessageToRouteProjectIssue } = require('../websockets/socket');
 
 
 // *****************************
@@ -75,8 +76,8 @@ router.post('/createproject', requiresAuth(), async (req, res) => {
 // Get project overview
 router.get('/:projectUrlId/overview', requiresAuth(), getDbId, async (req, res) => {
   const email = req.oidc.user.email;
-  const projectId = req.projectId;
 
+  res.send(`Message sent to project ${projectId} overview`);
   try {
     const result = await sql`
       SELECT 
