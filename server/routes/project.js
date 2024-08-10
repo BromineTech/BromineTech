@@ -48,11 +48,12 @@ router.post('/createproject', requiresAuth(), async (req, res) => {
     const projectId = insertIntoProject[0]?.ProjectId;
     if (!projectId) throw new Error('Project insertion failed');
     
-    const projectUrlId = await sql`
+    const projectUrlResult = await sql`
      INSERT INTO "DNS" ("dnsId", "dbId", "url")
      VALUES (uuid_generate_v4(), ${projectId}, ${randomString})
      RETURNING "url";
     `;
+    const projectUrlId = projectUrlResult[0].url
 
     await sql`
       INSERT INTO "Member" ("MemberId", "UserId", "ProjectId", "MemberRole")
@@ -92,7 +93,7 @@ router.get('/:projectUrlId/overview', requiresAuth(), getDbId, async (req, res) 
 });
 
 // Get project issues
-router.get('/:projectId/issues', requiresAuth(), getDbId, async (req, res) => {
+router.get('/:projectUrlId/issues', requiresAuth(), getDbId, async (req, res) => {
   const email = req.oidc.user.email;
   const projectId = req.projectId;
   try {
@@ -115,7 +116,7 @@ router.get('/:projectId/issues', requiresAuth(), getDbId, async (req, res) => {
 });
 
 // Get specific issue details
-router.get('/:projectId/issue/:issueId', requiresAuth(), getDbId, async (req, res) => {
+router.get('/:projectUrlId/issue/:issueId', requiresAuth(), getDbId, async (req, res) => {
   const email = req.oidc.user.email;
   const projectId = req.projectId;
   const issueId = req.issueId;
@@ -143,9 +144,12 @@ router.get('/:projectId/issue/:issueId', requiresAuth(), getDbId, async (req, re
 });
 
 // Add a new member to a project
-router.post('/:projectId/addmember', requiresAuth(), getDbId, async (req, res) => {
+router.post('/:projectUrlId/addmember', requiresAuth(), getDbId, async (req, res) => {
   const inviterEmail = req.oidc.user.email;
+  const inviterName = req.oidc.user.nickname;
   const projectId = req.projectId;
+  console.log(projectId)
+  
   const { inviteeEmail, invitedForRole = 'Guest' } = req.body;
   try {
     const inviterMember = await sql`
@@ -154,6 +158,7 @@ router.post('/:projectId/addmember', requiresAuth(), getDbId, async (req, res) =
       JOIN "User" u ON m."UserId" = u."UserId"
       WHERE u."Email" = ${inviterEmail} AND m."ProjectId" = ${projectId};
     `;
+    console.log(inviterMember)
     const inviterMemberId = inviterMember[0]?.MemberId;
     if (!inviterMemberId) throw new Error('Member not found');
 
@@ -162,7 +167,38 @@ router.post('/:projectId/addmember', requiresAuth(), getDbId, async (req, res) =
       VALUES (uuid_generate_v4(), ${inviterMemberId}, ${projectId}, ${inviteeEmail}, ${invitedForRole})
       RETURNING "InvitesId";
     `;
-    // Email logic to send invitation goes here
+    console.log("4")
+    // Email logic 
+    const to = `${inviteeEmail}`;
+    const subject = 'hello';
+    const bodyContent = `Hi ${inviterName}`;
+    const subscribed = false;
+    const name = 'hello';
+    const headers = {};
+    const requestBody = `{
+        "to": "${to}",
+        "subject": "${subject}",
+        "body": "${bodyContent}",
+        "subscribed": ${subscribed},
+        "name": "${name}",
+        "headers": ${JSON.stringify(headers)}
+    }`
+    const options = {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json', Authorization: `Bearer ${process.env.USE_PLUNK_API_KEY}`},
+        body: `${requestBody}`
+      };
+      
+        const response = await fetch('https://api.useplunk.com/v1/send', options);
+        const data = await response.json();
+        console.log("11",data);
+
+        if(!data.code===200){
+            res.status(500).json({ error: 'Internal Server Error' });
+        }
+
+        
+      console.log("2")
     res.status(200).json({ success: 'Invite sent' });
   } catch (err) {
     console.error('Error executing query', err);
