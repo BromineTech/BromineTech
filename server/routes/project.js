@@ -6,6 +6,12 @@ const sql = require('../dbConfig');
 const getRandomString = require('../utils/randomString');
 const getDbId = require('../middlewares/getDbId');
 
+
+// *****************************
+// email template daala bacha hai addmember route me
+// *****************************
+
+
 // Get all projects
 router.get('/all', requiresAuth(), insertIntoUser, async (req, res) => {
   const email = req.oidc.user.email;
@@ -143,6 +149,10 @@ router.get('/:projectUrlId/issue/:issueId', requiresAuth(), getDbId, async (req,
   }
 });
 
+
+// 
+// email template daala bacha hai
+// 
 // Add a new member to a project
 router.post('/:projectUrlId/addmember', requiresAuth(), getDbId, async (req, res) => {
   const inviterEmail = req.oidc.user.email;
@@ -168,6 +178,7 @@ router.post('/:projectUrlId/addmember', requiresAuth(), getDbId, async (req, res
       RETURNING "InvitesId";
     `;
     console.log("4")
+    // email template daalna bacha hai.
     // Email logic 
     const to = `${inviteeEmail}`;
     const subject = 'hello';
