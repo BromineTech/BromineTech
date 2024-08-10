@@ -8,14 +8,13 @@ const getDbId = require('../middlewares/getDbId');
 
 router.get('/', (req, res) => {
 
-// try {
-//   if (req.oidc.isAuthenticated()) {
-//     res.redirect('/project/all');
-//   }
-// } catch {
-//   res.status(500).send("Internal Server Error")
-// }
-  res.send("Hello")
+
+  if (req.oidc.isAuthenticated()) {
+    res.redirect('/project/all');
+    return;
+  }
+
+  res.json("Login Button")
 });
 
 module.exports = router;
