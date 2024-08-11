@@ -61,9 +61,9 @@ function initializeWebSocketServer(server) {
       const parsedMessage = message.toString();
       console.log(`Received in route ${route}, project ${projectId}, issue ${issueId || 'overview'}:`, parsedMessage);
       if(issueId){
-        broadcastMessageToRouteProjectIssue(route, projectId,null, issueId, parsedMessage)
+        broadcastMessageToMembers(route, projectId,null, issueId, parsedMessage)
       } else {
-        broadcastMessageToRouteProjectIssue(route, projectId,innerRoute, null, parsedMessage)
+        broadcastMessageToMembers(route, projectId,innerRoute, null, parsedMessage)
       }
 
     });
@@ -94,7 +94,7 @@ function initializeWebSocketServer(server) {
 }
 
 // Broadcast a message to a specific route, project, and optionally issue
-function broadcastMessageToRouteProjectIssue(route, projectId, innerRoute, issueId, message) {
+function broadcastMessageToMembers(route, projectId, innerRoute, issueId, message) {
   if (issueId) {
     if (!groups[route] || !groups[route][projectId] || !groups[route][projectId][issueId]) return;
 
@@ -151,4 +151,4 @@ function broadcastMessageToRouteProjectIssue(route, projectId, innerRoute, issue
   }
 }
 
-module.exports = { initializeWebSocketServer, broadcastMessageToRouteProjectIssue };
+module.exports = { initializeWebSocketServer};
