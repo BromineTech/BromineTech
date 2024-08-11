@@ -83,7 +83,7 @@ router.get('/:projectUrlId/overview', requiresAuth(), getDbId, async (req, res) 
       SELECT 
         p."ProjectId", p."ProjectName", p."ProjectDescription", p."ProjectStatus",
         p."ProjectTarget", p."ProjectStart", m."MilestoneId", m."MilestoneName",
-        m."MilestoneTarget", l."LinkId", l."InfoLink"
+        m."MilestoneTarget", l."LinkId", l."InfoLink", mb."MemberRole", u."UserName"
       FROM "User" u
       JOIN "Member" mb ON u."UserId" = mb."UserId"
       JOIN "Project" p ON mb."ProjectId" = p."ProjectId"
@@ -130,7 +130,7 @@ router.get('/:projectUrlId/issue/:issueId', requiresAuth(), getDbId, async (req,
   try {
     const result = await sql`
       SELECT 
-        i."IssueId", i."IssueName", i."IssueStatus", i."IssueLabel", m."MilestoneName",
+        i."IssueId", i."IssueName", i."IssueStatus",i."IssueDescription" i."IssueLabel", m."MilestoneName",
         m."MilestoneId", i."Assigned", i."SubIssueOf", a."ActivityId", a."ActivityDesc",
         a."ReplyTo", a."MemberId", a."ActivityTime", u2."UserName" AS "ActivityUserName"
       FROM "User" u
