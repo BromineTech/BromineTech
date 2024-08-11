@@ -55,10 +55,10 @@ export default function Waitlist() {
   
     <div className="flex relative w-full h-screen justify-center  items-start mt-10">
       <BackgroundBeams />
-      <div className="Globe flex flex-col gap-16 ">
+      <div className="Globe flex flex-col gap-4 py-4 ">
         <div className="relative z-10 flex w-full  flex-col justify-start items-center gap-2">
 
-          <p className="md:text-3xl border-2 p-4 rounded-full border-gray-600 text-xl text-gray-300 font-semibold my-4">
+          <p className="md:text-xl border-2 p-4 rounded-full border-gray-600 text-sm text-gray-300 font-semibold my-4">
             join the wailist
           </p>
 
@@ -66,7 +66,7 @@ export default function Waitlist() {
         <div className=" flex flex-col gap-4 justify-center items-center">
           <div className="flex flex-col justify-center items-center gap-2 p-2">
 
-            <p className="bg-gradient-to-br from-gray-400 via-white via-50% to-black text-transparent bg-clip-text p-2 text-5xl font-semibold text-center">
+            <p className="bg-gradient-to-br from-gray-400 via-white via-50% to-black text-transparent bg-clip-text p-2 text-2xl md:text-5xl font-semibold text-center">
               realtime and minimalist <br /> project  <br/>management tool <br/>{"                "}
             </p>
             <p className="md:text-xl text-sm text-gray-400 font-semibold">
