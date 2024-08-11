@@ -14,71 +14,78 @@ export default function Waitlist() {
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-   const toastId = toast.loading('Sending mail', {duration: 2000,position: 'top-center', invert: true})
+    const toastId = toast.loading('Sending mail', { duration: 2000, position: 'top-center', invert: true })
 
-   const token = "Bearer " + process.env.NEXT_PUBLIC_USE_PLUNK_API
-   const mailSendResponse: any = await fetch('https://api.useplunk.com/v1/track', {
+    const token = "Bearer " + process.env.NEXT_PUBLIC_USE_PLUNK_API
+    const mailSendResponse: any = await fetch('https://api.useplunk.com/v1/track', {
       method: "POST",
       headers: {
-          "Content-Type": "application/json",
-          "Authorization": `${token}`
+        "Content-Type": "application/json",
+        "Authorization": `${token}`
       },
       body: JSON.stringify({
-          "event": "joined-waitlist",
-          "email": `${formData}`,
-          "data": {
-            "tag": "waitlist",
-            "emailName": `${formData}`
+        "event": "joined-waitlist",
+        "email": `${formData}`,
+        "data": {
+          "tag": "waitlist",
+          "emailName": `${formData}`
         }
       })
-  });
-  const mailSend = await mailSendResponse.json() 
+    });
+    const mailSend = await mailSendResponse.json()
 
- if(mailSend.success){
-    toast.success('Mail sent', {
-      id: toastId,
-      description: "Thank you for joining the waitlist"
-    })
+    if (mailSend.success) {
+      toast.success('Mail sent', {
+        id: toastId,
+        description: "Thank you for joining the waitlist"
+      })
 
-  }
+    }
 
-  if(mailSend.error){
-    toast.error(`${mailSend.message}`, {
-      id: toastId,
-      description: `Please enter valid email address`
-    })
-  }
+    if (mailSend.error) {
+      toast.error(`${mailSend.message}`, {
+        id: toastId,
+        description: `Please enter valid email address`
+      })
+    }
 
   };
 
   return (
+  
     <div className="flex relative w-full h-screen justify-center  items-start mt-10">
+      <BackgroundBeams />
       <div className="Globe flex flex-col gap-16 ">
         <div className="relative z-10 flex w-full  flex-col justify-start items-center gap-2">
 
-        <p className="md:text-3xl border-2 p-4 rounded-full border-gray-600 text-xl text-gray-300 font-semibold my-4">
+          <p className="md:text-3xl border-2 p-4 rounded-full border-gray-600 text-xl text-gray-300 font-semibold my-4">
             join the wailist
           </p>
 
         </div>
-        <div className=" flex flex-col gap-4">
-          <div>
-        <p className="bg-gradient-to-br from-gray-400 via-white via-50% to-black text-transparent bg-clip-text  text-5xl font-semibold text-center">
-            realtime <br /> linear clone
-          </p>
-          <p className="md:text-xl text-sm text-gray-400 font-semibold">
-            manage your projects with lesser distractions
-          </p>
+        <div className=" flex flex-col gap-4 justify-center items-center">
+          <div className="flex flex-col justify-center items-center gap-2 p-2">
+
+            <p className="bg-gradient-to-br from-gray-400 via-white via-50% to-black text-transparent bg-clip-text p-2 text-5xl font-semibold text-center">
+              realtime and minimalist <br /> project  <br/>management tool <br/>{"                "}
+            </p>
+            <p className="md:text-xl text-sm text-gray-400 font-semibold">
+              manage your projects with lesser distractions
+            </p>
           </div>
           <PlaceholdersAndVanishInput
             placeholders={placeholders}
-            onChange={(e)=> setFormData(e.target.value)}
+            onChange={(e) => setFormData(e.target.value)}
             onSubmit={onSubmit}
           />
+
         </div>
+
       </div>
       <Toaster />
-      <BackgroundBeams />
+      
     </div>
+    
+    
   );
 }
