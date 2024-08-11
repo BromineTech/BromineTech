@@ -6,13 +6,13 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: 'Bromine',
-  description: 'Project management app for all',
+  description: 'Realtime and Minimalist Project management app for all',
   icons: {
     icon: '/favicon.ico', // Path to your favicon
   },
   openGraph: {
     title: 'Bromine waitlist',
-    description: 'minimalist linear clone',
+    description: 'realtime and minimalist project management app',
     url: 'https://bromine.tech',
     siteName: 'Bromine',
     images: [
