@@ -1,7 +1,8 @@
 const WebSocket = require('ws');
+require('dotenv').config();
 
-// A map to store WebSocket connections grouped by route and IDs
-const groups = {};
+// A map to store WebSocket connections grouped by project ID
+const connections = {};
 
 // Initialize WebSocket server
 function initializeWebSocketServer(server) {
@@ -14,141 +15,69 @@ function initializeWebSocketServer(server) {
     });
   });
 
+  //   server.on('upgrade', (request, socket, head) => {
+  //   const origin = request.headers.origin;
+
+  //   // Validate the origin header (e.g., allow only from https://example.com)
+  //   if (origin !== `${process.env.ORIGIN_URL}`) {
+  //     socket.destroy(); // Reject the connection if the origin is not allowed
+  //     return;
+  //   }
+
+  //   wss.handleUpgrade(request, socket, head, (ws) => {
+  //     wss.emit('connection', ws, request);
+  //   });
+  // });
+
   // Handle new WebSocket connections
   wss.on('connection', (ws, req) => {
     const urlParts = req.url.split('/');
-    const route = urlParts[1];
     const projectId = urlParts[2];
-    const innerRoute = urlParts[3];
-    const issueId = urlParts[4];
-    console.log(innerRoute)
-    // Initialize the route and project if not present
-    if (!groups[route]) {
-      groups[route] = {};
-    }
-    if (!groups[route][projectId]) {
-      groups[route][projectId] = {};
-    }
-    if (issueId) {
-        console.log("1")
-      if (!groups[route][projectId][issueId]) {
-        console.log("2")
-        groups[route][projectId][issueId] = new Set();
-      }
-      groups[route][projectId][issueId].add(ws);
-    } 
-    
-    if (!issueId){
-        console.log("3")
-        if(innerRoute==='overview'){
-      if (!groups[route][projectId]['overview']) {
-        groups[route][projectId]['overview'] = new Set();
-      }
-      groups[route][projectId]['overview'].add(ws);
-    } 
-    if(innerRoute==='issues'){
-        if (!groups[route][projectId]['issues']) {
-            groups[route][projectId]['issues'] = new Set();
-          }
-          groups[route][projectId]['issues'].add(ws);
+
+    // Initialize the project if not present
+    if (!connections[projectId]) {
+      connections[projectId] = new Set();
     }
 
-    }
+    connections[projectId].add(ws);
 
-    console.log(`New WebSocket connection established in route ${route}, project ${projectId}, issue ${issueId || 'overview'}.`);
+    console.log(`New WebSocket connection established for project ${projectId}.`);
 
     ws.on('message', (message) => {
-      const parsedMessage = message.toString();
-      console.log(`Received in route ${route}, project ${projectId}, issue ${issueId || 'overview'}:`, parsedMessage);
-      if(issueId){
-        broadcastMessageToMembers(route, projectId,null, issueId, parsedMessage)
-      } else {
-        broadcastMessageToMembers(route, projectId,innerRoute, null, parsedMessage)
-      }
+      const parsedMessage = JSON.parse(message);
+      const { route, issueId, text } = parsedMessage;
 
+      console.log(`Received message for project ${projectId}, route ${route}${issueId ? ', issue ' + issueId : ''}:`, parsedMessage);
+
+      broadcastMessageToMembers(projectId, route, issueId, parsedMessage);
     });
 
     ws.on('close', () => {
-      console.log(`WebSocket connection closed in route ${route}, project ${projectId}, issue ${issueId || 'overview'}.`);
-      if (issueId) {
-        groups[route][projectId][issueId].delete(ws);
-        if (groups[route][projectId][issueId].size === 0) {
-          delete groups[route][projectId][issueId];
-        }
-      } else {
-        groups[route][projectId]['overview'].delete(ws);
-        if (groups[route][projectId]['overview'].size === 0) {
-          delete groups[route][projectId]['overview'];
-        }
-      }
+      console.log(`WebSocket connection closed for project ${projectId}.`);
+      connections[projectId].delete(ws);
 
-      // Cleanup empty groups and routes
-      if (Object.keys(groups[route][projectId]).length === 0) {
-        delete groups[route][projectId];
-      }
-      if (Object.keys(groups[route]).length === 0) {
-        delete groups[route];
+      // Cleanup empty project groups
+      if (connections[projectId].size === 0) {
+        delete connections[projectId];
       }
     });
   });
 }
 
-// Broadcast a message to a specific route, project, and optionally issue
-function broadcastMessageToMembers(route, projectId, innerRoute, issueId, message) {
-  if (issueId) {
-    if (!groups[route] || !groups[route][projectId] || !groups[route][projectId][issueId]) return;
+// Broadcast a message to a specific project and optionally a route and issue
+function broadcastMessageToMembers(projectId, route, issueId, message) {
+  if (!connections[projectId]) return;
 
-    groups[route][projectId][issueId].forEach((client) => {
-      if (client.readyState === WebSocket.OPEN) {
-        try {
-          client.send(message);
-          console.log(`Message sent to route ${route}, project ${projectId}, issue ${issueId}:`, message);
-        } catch (error) {
-          console.error(`Error sending message to client in route ${route}, project ${projectId}, issue ${issueId}:`, error);
-        }
-      } else {
-        console.warn(`Client in route ${route}, project ${projectId}, issue ${issueId} is not open.`);
+  connections[projectId].forEach((client) => {
+    if (client.readyState === WebSocket.OPEN) {
+      try {
+        client.send(JSON.stringify({ route, issueId, message }));
+        console.log(`Message sent to project ${projectId}${route ? ', route ' + route : ''}${issueId ? ', issue ' + issueId : ''}:`, message);
+      } catch (error) {
+        console.error(`Error sending message to client in project ${projectId}:`, error);
       }
-    });
-  } else {
-    if(innerRoute==='overview'){
-        if (groups[route] && groups[route][projectId]) {
-            const overviewClients = groups[route][projectId]['overview'] || new Set();
-            
-            
-            overviewClients.forEach((client) => {
-              if (client.readyState === WebSocket.OPEN) {
-                try {
-                  client.send(message);
-                  console.log(`Message sent to route ${route}, project ${projectId}, overview:`, message);
-                } catch (error) {
-                  console.error(`Error sending message to client in route ${route}, project ${projectId}, overview:`, error);
-                }
-              }
-            });
-          }
     }
-    
-    if(innerRoute==='issues'){
-        if (groups[route] && groups[route][projectId]) {
-            const issuesClients = groups[route][projectId]['issues'] || new Set();
-            
-            
-            issuesClients.forEach((client) => {
-              if (client.readyState === WebSocket.OPEN) {
-                try {
-                  client.send(message);
-                  console.log(`Message sent to route ${route}, project ${projectId}, issues:`, message);
-                } catch (error) {
-                  console.error(`Error sending message to client in route ${route}, project ${projectId}, overview:`, error);
-                }
-              }
-            });
-          }
-    }
-
-    
-  }
+  });
 }
 
-module.exports = { initializeWebSocketServer};
+module.exports = { initializeWebSocketServer };

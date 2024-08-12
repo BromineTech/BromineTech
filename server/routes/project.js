@@ -5,7 +5,7 @@ const insertIntoUser = require('../middlewares/insertIntoUser');
 const sql = require('../dbConfig');
 const getRandomString = require('../utils/randomString');
 const getDbId = require('../middlewares/getDbId');
-const { initializeWebSocketServer, broadcastMessageToRouteProjectIssue } = require('../websockets/socket');
+const {  broadcastMessageToRouteProjectIssue } = require('../websockets/socket');
 
 
 // *****************************
@@ -18,7 +18,7 @@ router.get('/all', requiresAuth(), insertIntoUser, async (req, res) => {
   const email = req.oidc.user.email;
   try {
     const allProjects = await sql`
-      SELECT p."ProjectName"
+      SELECT p."ProjectName", p."ProjectStatus", p."ProjectTarget", p."ProjectDescription"
       FROM "User" u
       JOIN "Member" m ON u."UserId" = m."UserId"
       JOIN "Project" p ON m."ProjectId" = p."ProjectId"
@@ -52,8 +52,15 @@ router.post('/createproject', requiresAuth(), async (req, res) => {
       VALUES (uuid_generate_v4(), ${ProjectName})
       RETURNING "ProjectId";
     `;
+
+
     const projectId = insertIntoProject[0]?.ProjectId;
     if (!projectId) throw new Error('Project insertion failed');
+
+    await sql`
+    INSERT INTO "Member" ("MemberId", "UserId", "ProjectId", "MemberRole")
+    VALUES (uuid_generate_v4(), ${userId}, ${projectId}, ${memberRole});
+  `;
     
     const projectUrlResult = await sql`
      INSERT INTO "DNS" ("dnsId", "dbId", "url")
@@ -62,10 +69,7 @@ router.post('/createproject', requiresAuth(), async (req, res) => {
     `;
     const projectUrlId = projectUrlResult[0].url
 
-    await sql`
-      INSERT INTO "Member" ("MemberId", "UserId", "ProjectId", "MemberRole")
-      VALUES (uuid_generate_v4(), ${userId}, ${projectId}, ${memberRole});
-    `;
+
     res.redirect(`/project/${projectUrlId}/overview`);
   } catch (err) {
     console.error('Error executing query', err);
@@ -77,7 +81,8 @@ router.post('/createproject', requiresAuth(), async (req, res) => {
 router.get('/:projectUrlId/overview', requiresAuth(), getDbId, async (req, res) => {
   const email = req.oidc.user.email;
 
-  res.send(`Message sent to project ${projectId} overview`);
+  const projectId = req.projectId;
+  console.log("q")
   try {
     const result = await sql`
       SELECT 
@@ -154,6 +159,8 @@ router.get('/:projectUrlId/issue/:issueId', requiresAuth(), getDbId, async (req,
 // 
 // email template daala bacha hai
 // 
+
+
 // Add a new member to a project
 router.post('/:projectUrlId/addmember', requiresAuth(), getDbId, async (req, res) => {
   const inviterEmail = req.oidc.user.email;
@@ -173,45 +180,93 @@ router.post('/:projectUrlId/addmember', requiresAuth(), getDbId, async (req, res
     const inviterMemberId = inviterMember[0]?.MemberId;
     if (!inviterMemberId) throw new Error('Member not found');
 
-    await sql`
+  
+   const insertIntoInvites = await sql`
       INSERT INTO "Invites" ("InvitesId", "InvitedBy", "InvitedToProjectId", "InvitedEmail", "InvitedForRole")
       VALUES (uuid_generate_v4(), ${inviterMemberId}, ${projectId}, ${inviteeEmail}, ${invitedForRole})
       RETURNING "InvitesId";
     `;
-    console.log("4")
+
+    const invitesId = insertIntoInvites[0]?.invitesId;
+ 
+
+    await sql`
+    SELECT m."MemberId"
+    FROM "Member" m
+    JOIN "Project" p ON m."ProjectId" = p."ProjectId"
+    WHERE m."MemberId" = ${inviterMemberId} AND m."ProjectId" = ${projectId};
+  `;
+
+  const getProjectName = await sql`
+  SELECT p."ProjectName"
+  FROM "Member" m
+  JOIN "Project" p ON m."ProjectId" = p."ProjectId"
+  WHERE m."MemberId" = ${inviterMemberId} AND m."ProjectId" = ${projectId};
+`;
+
+
+  const projectName = getProjectName[0]?.ProjectName;
+
+
     // email template daalna bacha hai.
+
+
+
     // Email logic 
     const to = `${inviteeEmail}`;
-    const subject = 'hello';
-    const bodyContent = `Hi ${inviterName}`;
-    const subscribed = false;
-    const name = 'hello';
+    const subject = `You have been invited to join ${projectName}`;
+    const bodyContent = `
+    <div style="width: 600px; height: auto; border: 1px solid #000; padding: 20px; box-sizing: border-box; position: relative;">
+        <!-- Space for logo at the top -->
+        <div style="height: 60px;">
+        <img src="https://bromine.tech/banner.jpg" alt="banner of Bromine" style="border-radius: 15px; width: auto; height: auto;">
+        </div>
+          <!-- Horizontal line for separation -->
+          <hr style="border: 1px solid #ccc; margin: 20px 0;">
+    
+        <div>
+            Hi ${inviteeEmail},<br><br>
+            ${inviterEmail} has invited you to join the Project: ${projectName}.<br><br>
+            <!-- Horizontal line for separation -->
+            <hr style="border: 1px solid #ccc; margin: 20px 0;">
+    
+            <!-- Button -->
+            <a href="https://bromine.com/invite/${invitesId}" style="display: inline-block; padding: 10px 20px; margin-top: 20px; font-size: 16px; color: #fff; background-color: #007BFF; text-decoration: none; border-radius: 5px;">Join Now</a>
+        </div>
+    </div>
+    `;
+    const subscribed = true;
+    const name = 'Bromine';
     const headers = {};
-    const requestBody = `{
-        "to": "${to}",
-        "subject": "${subject}",
-        "body": "${bodyContent}",
-        "subscribed": ${subscribed},
-        "name": "${name}",
-        "headers": ${JSON.stringify(headers)}
-    }`
+    
+    // Properly stringify the requestBody object
+    const requestBody = JSON.stringify({
+        to: to,
+        subject: subject,
+        body: bodyContent,
+        subscribed: subscribed,
+        name: name,
+        headers: headers
+    });
+    
     const options = {
         method: 'POST',
-        headers: {'Content-Type': 'application/json', Authorization: `Bearer ${process.env.USE_PLUNK_API_KEY}`},
-        body: `${requestBody}`
-      };
-      
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${process.env.USE_PLUNK_API_KEY}`
+        },
+        body: requestBody
+    };
+    
+    try {
         const response = await fetch('https://api.useplunk.com/v1/send', options);
         const data = await response.json();
-        console.log("11",data);
-
-        if(!data.code===200){
-            res.status(500).json({ error: 'Internal Server Error' });
-        }
-
-        
-      console.log("2")
-    res.status(200).json({ success: 'Invite sent' });
+        console.log(data);
+        res.status(200).json({success:"Invite Sent"})
+    } catch (error) {
+        console.error('Error sending email:', error);
+    }
+    
   } catch (err) {
     console.error('Error executing query', err);
     res.status(500).json({ error: 'Internal Server Error' });
