@@ -164,7 +164,7 @@ router.get('/:projectUrlId/issue/:issueId', requiresAuth(), getDbId, async (req,
 // Add a new member to a project
 router.post('/:projectUrlId/addmember', requiresAuth(), getDbId, async (req, res) => {
   const inviterEmail = req.oidc.user.email;
-  const inviterName = req.oidc.user.nickname;
+  const inviterName = req.oidc.user.name;
   const projectId = req.projectId;
   console.log(projectId)
   
@@ -218,20 +218,26 @@ router.post('/:projectUrlId/addmember', requiresAuth(), getDbId, async (req, res
     const bodyContent = `
     <div style="width: 600px; height: auto; border: 1px solid #000; padding: 20px; box-sizing: border-box; position: relative;">
         <!-- Space for logo at the top -->
-        <div style="height: 30px; padding:10px 10px 10px 0px ">
-        <img src="https://bromine.tech/banner.jpg" alt="banner of Bromine" style="border-radius: 15px; padding: 5px; width: 120px; height: auto;">
+        <div style="height: 60px; padding:10px 10px 10px 0px ">
+        <img src="https://bromine.tech/logo.jpg" alt="banner of Bromine" style="border-radius: 15px; padding: 5px; width: 60px; height: auto;">
         </div>
-          <!-- Horizontal line for separation -->
-          <hr style="border: 1px solid #ccc; margin: 20px 0px;">
-    
+                <!-- Horizontal line for separation -->
+            <hr style="border: 1px solid #ccc; margin: 20px 0;">
         <div>
-            Hi ${inviteeEmail},<br><br>
-            ${inviterEmail} has invited you to join the Project: ${projectName}.<br><br>
+            <div style="font-weight: bold; font-size: 1.6em; line-height: 1.2em; margin-botton: 10px">
+                <p style="margin: 0;">${inviterName}</p>
+                <p style="margin: 0;">(${inviterEmail})</p>
+                <p style="margin: 0;">invited you to join in the Project: ${projectName}.</p>
+            </div>
+
+            <p>Use Bromine to plan, organise, lead and control your projects and crush your deadlines.</p>
+
+
             <!-- Horizontal line for separation -->
             <hr style="border: 1px solid #ccc; margin: 20px 0;">
     
             <!-- Button -->
-            <a href="https://bromine.com/invite/${invitesId}" style="display: inline-block; padding: 10px 20px; margin-top: 20px; font-size: 16px; color: #fff; background-color: #007BFF; text-decoration: none; border-radius: 5px;">Join Now</a>
+            <a href="https://bromine.tech/invite/${invitesId}" style="display: inline-block; padding: 10px 20px; margin-top: 20px; font-size: 16px; color: #fff; background-color: #007BFF; text-decoration: none; border-radius: 5px;">Join Your Team</a>
         </div>
     </div>
     `;
