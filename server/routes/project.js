@@ -16,6 +16,10 @@ const inviteSchema = z.object({
   inviteeEmail: z.string().email("Invalid email address"),
   invitedForRole: z.enum(["Guest", "Admin", "Contributor"]).default("Guest"),
 });
+const updateMemberSchema = z.object({
+  inviteeEmail: z.string().email("Invalid email address"),
+  invitedForRole: z.enum(["Guest", "Admin", "Contributor"]),
+});
 
 // Get all projects
 router.get('/all', requiresAuth(), insertIntoUser, async (req, res) => {
@@ -335,12 +339,20 @@ router.get('/invite/:inviteId', requiresAuth(), insertIntoUser, async (req, res)
   }
 });
 
+
+// route to update member role
 router.post('/:projectUrlId/updateMemberRole', requiresAuth(), getDbId, async (req, res) => {
   const projectId = req.projectId;
   const adminEmail = req.oidc.user.email;
-  const memberEmail = req.body.memberEmail;
-  const memberRole = req.body.memberRole;
 
+  const result = updateMemberSchema.safeParse(req.body);
+
+  if (!result.success) {
+      // If validation fails, send a 400 response with the errors
+      return res.status(400).json({ errors: result.error.issues });
+  }
+
+ const { memberEmail, memberRole } = req.body;
   try {
     // check if the member inviting is admin or not
     const checkRole = await sql`
