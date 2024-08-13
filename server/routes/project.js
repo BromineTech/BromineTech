@@ -305,4 +305,58 @@ router.get('/invite/:inviteId', requiresAuth(), insertIntoUser, async (req, res)
   }
 });
 
+router.post('/:projectUrlId/updateMemberRole', requiresAuth(), getDbId, async (req, res) => {
+  const projectId = req.projectId;
+  const adminEmail = req.oidc.user.email;
+  const memberEmail = req.body.memberEmail;
+  const memberRole = req.body.memberRole;
+
+  try {
+    // check if the member inviting is admin or not
+    const checkRole = await sql`
+      SELECT m."MemberRole"
+      FROM "Member" m 
+      JOIN "User" u
+      ON m."UserId" = u."UserId"
+      WHERE u."Email" = ${adminEmail}
+      AND m."ProjectId" = ${projectId};
+    `;
+    console.log(checkRole);
+    const role = checkRole[0]?.MemberRole;
+    console.log(role);
+    if(role !== 'Admin'){
+      res.json({
+        error:"Unauthorised"
+      })
+      return
+    }
+
+    const getUserId = await sql`
+      SELECT "UserId"
+      FROM "User"
+      WHERE "Email" = ${memberEmail};
+    `;
+    const userId = getUserId[0]?.UserId;
+    if (!userId) throw new Error('User not found');
+
+    const updateMemberRole = await sql`
+      UPDATE "Member"
+      SET "MemberRole" = ${memberRole}
+      WHERE "ProjectId" = ${projectId}
+      AND "UserId" = ${userId}
+      RETURNING *; 
+
+    `;
+    if (updateMemberRole.count === 0) {
+      return res.status(404).json({ error: 'No such user found in this project' });
+    }    
+
+
+      res.status(200).json({ success: 'Member Role updated'});
+    } catch (err) {
+      console.error('Error executing query', err);
+      res.status(500).json({ error: 'Internal Server Error' });
+   }
+  });
+
 module.exports = router;
