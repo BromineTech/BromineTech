@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const { z } = require("zod");
 const { requiresAuth } = require('express-openid-connect');
 const insertIntoUser = require('../middlewares/insertIntoUser');
 const sql = require('../dbConfig');
@@ -8,10 +9,13 @@ const getDbId = require('../middlewares/getDbId');
 const {  broadcastMessageToRouteProjectIssue } = require('../websockets/socket');
 
 
-// *****************************
-// email template daala bacha hai addmember route me
-// *****************************
 
+
+// zod schemas
+const inviteSchema = z.object({
+  inviteeEmail: z.string().email("Invalid email address"),
+  invitedForRole: z.enum(["Guest", "Admin", "Contributor"]).default("Guest"),
+});
 
 // Get all projects
 router.get('/all', requiresAuth(), insertIntoUser, async (req, res) => {
@@ -168,6 +172,13 @@ router.post('/:projectUrlId/addmember', requiresAuth(), getDbId, async (req, res
   const projectId = req.projectId;
   console.log(projectId)
   
+  const result = inviteSchema.safeParse(req.body);
+
+  if (!result.success) {
+      // If validation fails, send a 400 response with the errors
+      return res.status(400).json({ errors: result.error.issues });
+  }
+
   const { inviteeEmail, invitedForRole = 'Guest' } = req.body;
   try {
     const inviterMember = await sql`
@@ -269,13 +280,12 @@ router.post('/:projectUrlId/addmember', requiresAuth(), getDbId, async (req, res
         const data = await response.json();
         console.log(data);
         if(data.error){
-        res.status(500).json({success:"Invite Sent"})
+        res.status(500).json({error:"Invite Not Sent"})
         return;
         }
         
         res.status(200).json({success:"Invite Sent"})
         
-  
     
   } catch (err) {
     console.error('Error executing query', err);
