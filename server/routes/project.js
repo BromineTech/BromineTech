@@ -264,14 +264,18 @@ router.post('/:projectUrlId/addmember', requiresAuth(), getDbId, async (req, res
         body: requestBody
     };
     
-    try {
+    
         const response = await fetch('https://api.useplunk.com/v1/send', options);
         const data = await response.json();
         console.log(data);
+        if(data.error){
+        res.status(500).json({success:"Invite Sent"})
+        return;
+        }
+        
         res.status(200).json({success:"Invite Sent"})
-    } catch (error) {
-        console.error('Error sending email:', error);
-    }
+        
+  
     
   } catch (err) {
     console.error('Error executing query', err);
@@ -290,7 +294,9 @@ router.get('/invite/:inviteId', requiresAuth(), insertIntoUser, async (req, res)
       WHERE "InvitesId" = ${inviteId};
     `;
     if (emailInInvitesTable[0]?.InvitedEmail === email) {
-      const { InvitedForRole: invitedForRole, InvitedToProjectId: projectId } = emailInInvitesTable[0];
+      const { InvitedForRole, InvitedToProjectId } = emailInInvitesTable[0];
+      const invitedForRole = InvitedForRole 
+      const projectId = InvitedToProjectId
       const getUserId = await sql`
         SELECT "UserId"
         FROM "User"
@@ -301,7 +307,15 @@ router.get('/invite/:inviteId', requiresAuth(), insertIntoUser, async (req, res)
         INSERT INTO "Member" ("MemberId", "UserId", "ProjectId", "MemberRole")
         VALUES (uuid_generate_v4(), ${userId}, ${projectId}, ${invitedForRole});
       `;
-      res.redirect(`/project/${projectId}/overview`);
+
+      const getProjectUrl = await sql `
+      SELECT "url" 
+      FROM "DNS"
+      WHERE "dbId" = ${projectId}
+      `
+
+      const projectUrlId = getProjectUrl[0]?.url;
+      res.redirect(`/project/${projectUrlId}/overview`);
     } else {
       res.redirect(`/project/all`);
     }
