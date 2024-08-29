@@ -1,6 +1,6 @@
 const WebSocket = require('ws');
 require('dotenv').config();
-
+const sql =  require('../dbConfig')
 // A map to store WebSocket connections grouped by project ID
 const connections = {};
 
@@ -29,6 +29,7 @@ function initializeWebSocketServer(server) {
   //   });
   // });
 
+
   // Handle new WebSocket connections
   wss.on('connection', (ws, req) => {
     const urlParts = req.url.split('/');
@@ -43,13 +44,50 @@ function initializeWebSocketServer(server) {
 
     console.log(`New WebSocket connection established for project ${projectId}.`);
 
-    ws.on('message', (message) => {
+    ws.on('message', async (message) => {
       const parsedMessage = JSON.parse(message);
-      const { route, issueId, text } = parsedMessage;
+      const { 
+        route= null,
+        issueId= null,
+        field= null,
+        isText= null,
+        text= null,
+        isComment= null,
+        Comment= null,
+        isActivity= null,
+        Activity= null
+       } = parsedMessage;
 
-      console.log(`Received message for project ${projectId}, route ${route}${issueId ? ', issue ' + issueId : ''}:`, parsedMessage);
+       try {
 
-      broadcastMessageToMembers(projectId, route, issueId, parsedMessage);
+        try {
+          if (isText) {
+            await sql`INSERT INTO text_table (project_id, issue_id, text) VALUES (${projectId}, ${issueId}, ${text})`;
+          }
+          if (isComment) {
+            await sql`INSERT INTO comment_table (project_id, issue_id, comment) VALUES (${projectId}, ${issueId}, ${Comment})`;
+          }
+          if (isActivity) {
+            await sql`INSERT INTO activity_table (project_id, issue_id, activity) VALUES (${projectId}, ${issueId}, ${Activity})`;
+          }
+        } catch (dbError) {
+          console.error("Database operation error:", dbError);
+          // Handle database-specific errors, e.g., notify the client, etc.
+        }
+
+
+            // Broadcast the message to other clients
+            try {
+              broadcastMessageToMembers(projectId, route, issueId, parsedMessage);
+            } catch (broadcastError) {
+              console.error("Broadcasting error:", broadcastError);
+              // Handle broadcasting errors, e.g., log the issue, etc.
+            }
+       } catch(err) {
+        console.log("Websockt OnMessage handler: ", err);
+       }
+
+
     });
 
     ws.on('close', () => {
