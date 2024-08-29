@@ -14,6 +14,10 @@ const sql = postgres({
   connection: {
     options: `project=${ENDPOINT_ID}`,
   },
+    // Pool settings
+    max: 10, // Maximum number of connections in the pool
+    idle_timeout: 30, // Idle timeout in seconds
+    connect_timeout: 10, // Connection timeout in seconds
 });
 
 // dbConfig.js

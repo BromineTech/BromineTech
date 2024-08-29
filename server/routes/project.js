@@ -6,7 +6,6 @@ const insertIntoUser = require('../middlewares/insertIntoUser');
 const sql = require('../dbConfig');
 const getRandomString = require('../utils/randomString');
 const getDbId = require('../middlewares/getDbId');
-const {  broadcastMessageToRouteProjectIssue } = require('../websockets/socket');
 
 
 
@@ -42,7 +41,7 @@ router.get('/all', requiresAuth(), insertIntoUser, async (req, res) => {
 // Create a new project
 router.post('/createproject', requiresAuth(), async (req, res) => {
   const email = req.oidc.user.email;
-  const { ProjectName } = req.body;
+  const { ProjectName, ProjectDescription = null } = req.body;
   const memberRole = 'Admin';
   const randomString = getRandomString();
 
@@ -56,8 +55,8 @@ router.post('/createproject', requiresAuth(), async (req, res) => {
     if (!userId) throw new Error('User not found');
 
     const insertIntoProject = await sql`
-      INSERT INTO "Project" ("ProjectId", "ProjectName")
-      VALUES (uuid_generate_v4(), ${ProjectName})
+      INSERT INTO "Project" ("ProjectId", "ProjectName", "ProjectDescripton")
+      VALUES (uuid_generate_v4(), ${ProjectName}, ${ProjectDescription})
       RETURNING "ProjectId";
     `;
 
@@ -323,7 +322,7 @@ router.get('/invite/:inviteId', requiresAuth(), insertIntoUser, async (req, res)
       `;
 
       const getProjectUrl = await sql `
-      SELECT "url" 
+      SELECT "url"
       FROM "DNS"
       WHERE "dbId" = ${projectId}
       `
