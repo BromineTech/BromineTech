@@ -94,7 +94,7 @@ router.get('/:projectUrlId/overview', requiresAuth(), getDbId, async (req, res) 
     const result = await sql`
       SELECT 
         p."ProjectId", p."ProjectName", p."ProjectDescription", p."ProjectStatus",
-        p."ProjectTarget", p."ProjectStart", m."MilestoneId", m."MilestoneName",
+        p."ProjectTarget", p."ProjectStart", m."MilestoneId", m."MilestoneName", m."MilestoneDescription",
         m."MilestoneTarget", l."LinkId", l."InfoLink", mb."MemberRole", u."UserName"
       FROM "User" u
       JOIN "Member" mb ON u."UserId" = mb."UserId"
