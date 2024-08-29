@@ -34,6 +34,7 @@ function initializeWebSocketServer(server) {
   wss.on('connection', (ws, req) => {
     const urlParts = req.url.split('/');
     const projectId = urlParts[2];
+    ws.projectId = projectId;
 
     // Initialize the project if not present
     if (!connections[projectId]) {
@@ -47,29 +48,68 @@ function initializeWebSocketServer(server) {
     ws.on('message', async (message) => {
       const parsedMessage = JSON.parse(message);
       const { 
-        route= null,
+        route,
         issueId= null,
+        milestoneId= null,
+        temporaryId= null,
         field= null,
         isText= null,
         text= null,
-        isComment= null,
-        Comment= null,
         isActivity= null,
-        Activity= null
+        Activity= null,
+        isAction= null,
+        Action= null
        } = parsedMessage;
 
        try {
 
         try {
-          if (isText) {
-            await sql`INSERT INTO text_table (project_id, issue_id, text) VALUES (${projectId}, ${issueId}, ${text})`;
+          if (route === "overview") {
+            if (isText) {
+              if (field === "projectName") {}
+              if (field === "projectDescription") {}
+              if (field === "milestoneName") {}
+              if (field === "milestoneDescription") {}
+            }
+            if (isAction) {
+              if (Action.subField === "projectStartDate") {}
+              if (Action.subField === "projectTargetDate") {}
+              if (Action.subField === "projectStatus") {}
+              if (Action.subField === "link") {}
+              if (Action.subField === "milestone") {//yaha pe milestone create hoga ya delete hoga
+              }
+              if (Action.subField === "milestoneTargetDate") {}
+            }
           }
-          if (isComment) {
-            await sql`INSERT INTO comment_table (project_id, issue_id, comment) VALUES (${projectId}, ${issueId}, ${Comment})`;
+          if (route === "issues") {
+            if (isAction) {
+              if (Action.subField === "issue") {//yaha pe issue create hoga ya delete hoga
+              }
+              if (Action.subField === "milestone") {//yaha milestone change hoga
+              }
+              if (Action.subField === "assign") {//yaha pe issue ka assign change hoga
+              }
+            }
           }
-          if (isActivity) {
-            await sql`INSERT INTO activity_table (project_id, issue_id, activity) VALUES (${projectId}, ${issueId}, ${Activity})`;
+          if (issueId === "issueId") {
+            if (isText) {
+              if (field === "issueName") {}
+              if (field === "issueDescription") {}
+            }
+            if (isActivity) {
+    
+            }
+            if (isAction) {
+              if (Action.subField === "assignIssueTo") {}
+              if (Action.subField === "assignSubIssueTo") {}
+              if (Action.subField === "milestone") {}
+              if (Action.subField === "subIssue") {
+                if (Action.type === "add") {}
+                if (Action.type === "delete") {}
+              }
+            }
           }
+          
         } catch (dbError) {
           console.error("Database operation error:", dbError);
           // Handle database-specific errors, e.g., notify the client, etc.
@@ -78,7 +118,7 @@ function initializeWebSocketServer(server) {
 
             // Broadcast the message to other clients
             try {
-              broadcastMessageToMembers(projectId, route, issueId, parsedMessage);
+              broadcastMessageToMembers(ws.projectId, route, issueId, parsedMessage);
             } catch (broadcastError) {
               console.error("Broadcasting error:", broadcastError);
               // Handle broadcasting errors, e.g., log the issue, etc.
