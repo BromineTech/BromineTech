@@ -66,10 +66,34 @@ function initializeWebSocketServer(server) {
         try {
           if (route === "overview") {
             if (isText) {
-              if (field === "projectName") {}
-              if (field === "projectDescription") {}
-              if (field === "milestoneName") {}
-              if (field === "milestoneDescription") {}
+              if (field === "projectName") {
+                await sql`UPDATE "Project"
+                    SET "ProjectName" = ${text}
+                    FROM "DNS"
+                    WHERE "Project"."ProjectId" = "DNS"."dbId"
+                    AND "DNS"."url" = ${ws.projectId}`;
+              }
+              if (field === "projectDescription") {
+                await sql`UPDATE "Project"
+                    SET "ProjectDescription" = ${text}
+                    FROM "DNS"
+                    WHERE "Project"."ProjectId" = "DNS"."dbId"
+                    AND "DNS"."url" = ${ws.projectId}`;
+              }
+              if (field === "milestoneName") {
+                await sql`UPDATE "Milestone"
+                    SET "MilestoneName" = ${text}
+                    FROM "DNS"
+                    WHERE "Milestone"."ProjectId" = "DNS"."dbId"
+                    AND "DNS"."url" = ${ws.projectId}`;
+              }
+              if (field === "milestoneDescription") {
+                await sql`UPDATE "Milestone"
+                    SET "MilestoneDescription" = ${text}
+                    FROM "DNS"
+                    WHERE "Milestone"."ProjectId" = "DNS"."dbId"
+                    AND "DNS"."url" = ${ws.projectId}`;
+              }
             }
             if (isAction) {
               if (Action.subField === "projectStartDate") {}
