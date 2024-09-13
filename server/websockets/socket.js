@@ -156,7 +156,7 @@ function initializeWebSocketServer(server) {
                     break;
                 }
               }
-              if (action.subField === "link") { // see delete operation. how to give linkId
+              if (action.subField === "link") { // see delete operation. how to give linkId and review delete query
                 switch (action.type) {
 
                   case "add":
@@ -176,7 +176,7 @@ function initializeWebSocketServer(server) {
                     break;
                 }
               }
-              if (action.subField === "milestone") {//yaha pe milestone create hoga ya delete hoga
+              if (action.subField === "milestone") {//yaha pe milestone create hoga ya delete hoga and review delete query
                 switch (action.type) {
 
                   case "add":
@@ -203,7 +203,7 @@ function initializeWebSocketServer(server) {
                     break;
                 }
               }
-              if (action.subField === "milestoneTargetDate") {
+              if (action.subField === "milestoneTargetDate") { // review delete query
                 switch (action.type) {
 
                   case "add":
@@ -211,15 +211,17 @@ function initializeWebSocketServer(server) {
                               SET "MilestoneTarget" = '2023-12-31'
                               FROM "DNS"
                               WHERE "Milestone"."ProjectId" = "DNS"."dbId"
+                              WHERE "MilestoneId" = 'your_specific_milestone_id'
                               AND "DNS"."url" = ${ws.projectId}`;
-                    break;
-                  
-                  case "update":
-                    await sql``;
                     break;
 
                   case "delete":
-                    await sql``;
+                    await sql`UPDATE "Milestone"
+                              SET "MilestoneTarget" = ${null}
+                              FROM "DNS"
+                              WHERE "Milestone"."ProjectId" = "DNS"."dbId"
+                              WHERE "MilestoneId" = 'your_specific_milestone_id'
+                              AND "DNS"."url" = ${ws.projectId}`;
                     break;
                 }
               }
