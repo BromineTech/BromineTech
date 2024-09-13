@@ -56,9 +56,9 @@ function initializeWebSocketServer(server) {
         isText= null,
         text= null,
         isActivity= null,
-        Activity= null,
+        activity= null,
         isAction= null,
-        Action= null
+        action= null
        } = parsedMessage;
 
        try {
@@ -96,40 +96,188 @@ function initializeWebSocketServer(server) {
               }
             }
             if (isAction) {
-              if (Action.subField === "projectStartDate") {}
-              if (Action.subField === "projectTargetDate") {}
-              if (Action.subField === "projectStatus") {}
-              if (Action.subField === "link") {}
-              if (Action.subField === "milestone") {//yaha pe milestone create hoga ya delete hoga
+              if (action.subField === "projectStartDate") {
+                switch (action.type) {
+
+                  case "add":
+                    await sql``;
+                    break;
+                  
+                  case "update":
+                    await sql``;
+                    break;
+                }
               }
-              if (Action.subField === "milestoneTargetDate") {}
+              if (action.subField === "projectTargetDate") {
+                switch (action.type) {
+
+                  case "add":
+                    await sql``;
+                    break;
+                  
+                  case "update":
+                    await sql``;
+                    break;
+                }
+              }
+              if (action.subField === "projectStatus") {
+                switch (action.type) {
+
+                  case "add":
+                    await sql``;
+                    break;
+                  
+                  case "update":
+                    await sql``;
+                    break;
+                }
+              }
+              if (action.subField === "link") {
+                switch (action.type) {
+
+                  case "add":
+                    await sql``;
+                    break;
+                  
+                  case "update":
+                    await sql``;
+                    break;
+
+                  case "delete":
+                    await sql``;
+                    break;
+                }
+              }
+              if (action.subField === "milestone") {//yaha pe milestone create hoga ya delete hoga
+                switch (action.type) {
+
+                  case "add":
+                    await sql``;
+                    break;
+
+                  case "delete":
+                    await sql``;
+                    break;
+                }
+              }
+              if (action.subField === "milestoneTargetDate") {
+                switch (action.type) {
+
+                  case "add":
+                    await sql``;
+                    break;
+                  
+                  case "update":
+                    await sql``;
+                    break;
+
+                  case "delete":
+                    await sql``;
+                    break;
+                }
+              }
             }
           }
           if (route === "issues") {
             if (isAction) {
-              if (Action.subField === "issue") {//yaha pe issue create hoga ya delete hoga
+              if (action.subField === "issue") {//yaha pe issue create hoga ya delete hoga
+                switch (action.type) {
+
+                  case "add":
+                    await sql``;
+                    break;
+
+                  case "delete":
+                    await sql``;
+                    break;
+                }
               }
-              if (Action.subField === "milestone") {//yaha milestone change hoga
+              if (action.subField === "milestone") {//yaha milestone change hoga
+                switch (action.type) {
+
+                  case "add":
+                    await sql``;
+                    break;
+
+                  case "delete":
+                    await sql``;
+                    break;
+                }
               }
-              if (Action.subField === "assign") {//yaha pe issue ka assign change hoga
+              if (action.subField === "assign") {//yaha pe issue ka assign change hoga
+                switch (action.activityType) {
+
+                  case "add":
+                    await sql``;
+                    break;
+
+                  case "delete":
+                    await sql``;
+                    break;
+                }
               }
             }
           }
           if (issueId === "issueId") {
             if (isText) {
-              if (field === "issueName") {}
-              if (field === "issueDescription") {}
+              if (field === "issueName") {
+                await sql``;
+              }
+              if (field === "issueDescription") {
+                await sql``;
+              }
             }
             if (isActivity) {
     
             }
             if (isAction) {
-              if (Action.subField === "assignIssueTo") {}
-              if (Action.subField === "assignSubIssueTo") {}
-              if (Action.subField === "milestone") {}
-              if (Action.subField === "subIssue") {
-                if (Action.type === "add") {}
-                if (Action.type === "delete") {}
+              if (action.subField === "assignIssueTo") {
+                switch (action.activityType) {
+
+                  case "add":
+                    await sql``;
+                    break;
+
+                  case "delete":
+                    await sql``;
+                    break;
+                }
+              }
+              if (action.subField === "assignSubIssueTo") {
+                switch (action.type) {
+
+                  case "add":
+                    await sql``;
+                    break;
+
+                  case "delete":
+                    await sql``;
+                    break;
+                }
+              }
+              if (action.subField === "milestone") {
+                switch (action.activityType) {
+
+                  case "add":
+                    await sql``;
+                    break;
+
+                  case "delete":
+                    await sql``;
+                    break;
+                }
+              }
+              if (action.subField === "subIssue") {
+                switch (action.type) {
+
+                  case "add":
+                    await sql``;
+                    break;
+
+                  case "delete":
+                    await sql``;
+                    break;
+                }
               }
             }
           }
