@@ -96,27 +96,43 @@ function initializeWebSocketServer(server) {
               }
             }
             if (isAction) {
-              if (action.subField === "projectStartDate") {
+              if (action.subField === "projectStartDate") { // check for redundancy of queries
                 switch (action.type) {
 
                   case "add":
-                    await sql``;
+                    await sql`UPDATE "Project"
+                          SET "ProjectStart" = ${action.detail} 
+                          FROM "DNS"
+                          WHERE "Project"."ProjectId" = "DNS"."dbId"
+                          AND "DNS"."url" = ${ws.projectId}`;
                     break;
                   
                   case "update":
-                    await sql``;
+                    await sql`UPDATE "Project"
+                          SET "ProjectStart" = ${action.detail} 
+                          FROM "DNS"
+                          WHERE "Project"."ProjectId" = "DNS"."dbId"
+                          AND "DNS"."url" = ${ws.projectId}`;
                     break;
                 }
               }
-              if (action.subField === "projectTargetDate") {
+              if (action.subField === "projectTargetDate") { // check for redundancy of queries
                 switch (action.type) {
 
                   case "add":
-                    await sql``;
+                    await sql`UPDATE "Project"
+                          SET "ProjectTarget" = ${action.detail} 
+                          FROM "DNS"
+                          WHERE "Project"."ProjectId" = "DNS"."dbId"
+                          AND "DNS"."url" = ${ws.projectId}`;
                     break;
                   
                   case "update":
-                    await sql``;
+                    await sql`UPDATE "Project"
+                          SET "ProjectTarget" = ${action.detail} 
+                          FROM "DNS"
+                          WHERE "Project"."ProjectId" = "DNS"."dbId"
+                          AND "DNS"."url" = ${ws.projectId}`;
                     break;
                 }
               }
@@ -124,27 +140,39 @@ function initializeWebSocketServer(server) {
                 switch (action.type) {
 
                   case "add":
-                    await sql``;
+                    await sql`UPDATE "Project"
+                          SET "ProjectStatus" = ${action.detail} 
+                          FROM "DNS"
+                          WHERE "Project"."ProjectId" = "DNS"."dbId"
+                          AND "DNS"."url" = ${ws.projectId}`;
                     break;
                   
                   case "update":
-                    await sql``;
+                    await sql`UPDATE "Project"
+                          SET "ProjectStatus" = ${action.detail} 
+                          FROM "DNS"
+                          WHERE "Project"."ProjectId" = "DNS"."dbId"
+                          AND "DNS"."url" = ${ws.projectId}`;
                     break;
                 }
               }
-              if (action.subField === "link") {
+              if (action.subField === "link") { // see delete operation. how to give linkId
                 switch (action.type) {
 
                   case "add":
-                    await sql``;
-                    break;
-                  
-                  case "update":
-                    await sql``;
+                    await sql`UPDATE "Link"
+                          SET "InfoLink" = ${action.detail} 
+                          FROM "DNS"
+                          WHERE "Link"."ProjectId" = "DNS"."dbId"
+                          AND "DNS"."url" = ${ws.projectId}`;
                     break;
 
                   case "delete":
-                    await sql``;
+                    await sql`DELETE FROM "Link"
+                              USING "DNS"
+                              WHERE "Link"."LinkId" = ${action.detail}  -- Replace with the specific LinkId
+                              AND "Link"."ProjectId" = "DNS"."dbId"
+                              AND "DNS"."url" = ${ws.projectId} `;
                     break;
                 }
               }
@@ -152,11 +180,26 @@ function initializeWebSocketServer(server) {
                 switch (action.type) {
 
                   case "add":
-                    await sql``;
-                    break;
+                    await sql`INSERT INTO "Milestone" ("MilestoneId", "ProjectId", "MilestoneName", "MilestoneTarget")
+                              SELECT 
+                                  uuid_generate_v4(),
+                                  "Project"."ProjectId",
+                                  'New Milestone Name',
+                                  '2023-12-31'
+                              FROM 
+                                  "Project"
+                              JOIN 
+                                  "DNS" ON "Project"."ProjectId" = "DNS"."dbId"
+                              WHERE 
+                                  "DNS"."url" = 'your_provided_url'`;
+                      break;
 
                   case "delete":
-                    await sql``;
+                    await sql`DELETE FROM "Milestone"
+                              USING "DNS"
+                              WHERE "Milestone"."ProjectId" = "DNS"."dbId"
+                              AND "DNS"."url" = ${ws.projectId}
+                              AND "Milestone"."MilestoneId" = 'your_specific_milestone_id'`;
                     break;
                 }
               }
@@ -164,7 +207,11 @@ function initializeWebSocketServer(server) {
                 switch (action.type) {
 
                   case "add":
-                    await sql``;
+                    await sql`UPDATE "Milestone"
+                              SET "MilestoneTarget" = '2023-12-31'
+                              FROM "DNS"
+                              WHERE "Milestone"."ProjectId" = "DNS"."dbId"
+                              AND "DNS"."url" = ${ws.projectId}`;
                     break;
                   
                   case "update":
@@ -221,10 +268,18 @@ function initializeWebSocketServer(server) {
           if (issueId === "issueId") {
             if (isText) {
               if (field === "issueName") {
-                await sql``;
+                await sql`UPDATE "Issue"
+                          SET "IssueName" = ${text}
+                          FROM "DNS"
+                          WHERE "Issue"."ProjectId" = "DNS"."dbId"
+                          AND "DNS"."url" = ${ws.projectId}`;
               }
               if (field === "issueDescription") {
-                await sql``;
+                await sql`UPDATE "Issue"
+                          SET "IssueDescription" = ${text}
+                          FROM "DNS"
+                          WHERE "Issue"."ProjectId" = "DNS"."dbId"
+                          AND "DNS"."url" = ${ws.projectId}`;
               }
             }
             if (isActivity) {
