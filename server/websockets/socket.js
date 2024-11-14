@@ -254,7 +254,7 @@ function initializeWebSocketServer(server) {
                 }
               }
               if (action.subField === "assign") {//yaha pe issue ka assign change hoga
-                switch (action.activityType) {
+                switch (action.type) {
 
                   case "add":
                     await sql``;
@@ -289,7 +289,7 @@ function initializeWebSocketServer(server) {
             }
             if (isAction) {
               if (action.subField === "assignIssueTo") {
-                switch (action.activityType) {
+                switch (action.type) {
 
                   case "add":
                     await sql``;
