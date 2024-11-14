@@ -292,11 +292,20 @@ function initializeWebSocketServer(server) {
                 switch (action.type) {
 
                   case "add":
-                    await sql``;
+                    await sql`UPDATE "Issue"
+                              SET "Assigned" = ${action.detail.assigned}
+                              WHERE "ProjectId" = ${ws.projectId}
+                              AND "IssueId" = ${action.detail.issueId}
+                              RETURNING *`;
                     break;
 
                   case "delete":
-                    await sql``;
+                    await sql`UPDATE "Issue"
+                              SET "Assigned" = ${null}
+                              WHERE "ProjectId" = ${ws.projectId}
+                              AND "IssueId" = ${action.detail.issueId}
+                              RETURNING *
+                              `;
                     break;
                 }
               }
@@ -313,7 +322,7 @@ function initializeWebSocketServer(server) {
                 }
               }
               if (action.subField === "milestone") {
-                switch (action.activityType) {
+                switch (action.type) {
 
                   case "add":
                     await sql``;
