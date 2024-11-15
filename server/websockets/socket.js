@@ -348,7 +348,57 @@ function initializeWebSocketServer(server) {
               }
             }
             if (isActivity) {
-    
+                                  /* Activity: {isComment: true ya false, 
+                                                isEvent: true ya false,
+                                                commentDetails: agr isComment true rha to {},
+                                                eventDetails: agr isEvent true rha to {
+                                                eventSet: anyone of values "milestone", "status", "label", "assign" (bascically enums)
+                                                eventType: anyone of values "add" or "remove",
+                                                eventInfo: yaha pe string hoga jo btayega is event ko
+                                                }
+                                  } */
+              if(isComment) {
+                // commments and replies se deal krna hai
+
+              }
+              if(isEvent) {
+                
+                // events se deal karenge. example: gitesh created this issue. rajeev added december milestone to this issue. rajeev removed the september lable from this issue
+                // milestone, status, label, assign
+                switch(activity.eventDetails.eventSet){
+                  case "milestone":
+                    if(activity.eventDetails.eventType === "add") {
+                      await sql``;
+                    } else {
+                      await sql``;
+                    }
+                    break;
+                  
+                  case "status":
+                    if(activity.eventDetails.eventType === "add") {
+                      await sql``;
+                    } else {
+                      await sql``;
+                    }
+                    break;
+                  
+                  case "label":
+                    if(activity.eventDetails.eventType === "add") {
+                      await sql``;
+                    } else {
+                      await sql``;
+                    }
+                    break;
+
+                  case "assign":
+                    if(activity.eventDetails.eventType === "add") {
+                      await sql``;
+                    } else {
+                      await sql``;
+                    }
+                    break;
+                }
+              }
             }
             if (isAction) {
               if (action.subField === "assignIssueTo") {
