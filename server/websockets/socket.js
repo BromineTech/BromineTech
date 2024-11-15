@@ -355,11 +355,6 @@ function initializeWebSocketServer(server) {
                                                 eventSet: anyone of values "milestone", "status", "label", "assign" (bascically enums)
                                                 eventType: anyone of values "add" or "remove",
                                                 eventInfo: yaha pe string hoga jo btayega is event ko
-                                                newStatus:
-                                                newLabel:
-                                                newAssigned:
-                                                eventIssueId:
-                                                eventmemberId: //ye member id kaha se lana hai wahi dekhna hai. mtlb frontend se backend me kaise bhejna hai
                                                 }
                                   } */
               if(isComment) {
@@ -373,51 +368,21 @@ function initializeWebSocketServer(server) {
                 switch(activity.eventDetails.eventSet){
                   case "milestone":
                     if(activity.eventDetails.eventType === "add") {
-                      await sql`
-                      INSERT INTO "Activity" (
-                        "ActivityId", 
-                        "ActivityDesc", 
-                        "ReplyTo", 
-                        "MemberId", 
-                        "ActivityTime", 
-                        "Type", 
-                        "IssueId"
-                    ) 
-                    VALUES (
-                        uuid_generate_v4(), 
-                        ${activity.eventDetails.eventInfo},
-                        NULL, 
-                        ${memberId}, 
-                        NOW(), 
-                        "event", 
-                        ${activity.eventDetails.eventIssueId}
-                    )
-                    RETURNING * `;
+                      await sql``;
                     } else {
-                      await sql`
-                        INSERT INTO "Activity" (
-                        "ActivityId", 
-                        "ActivityDesc", 
-                        "ReplyTo", 
-                        "MemberId", 
-                        "ActivityTime", 
-                        "Type", 
-                        "IssueId"
-                    ) 
-                    VALUES (
-                        uuid_generate_v4(), 
-                        ${activity.eventDetails.eventInfo},
-                        NULL, 
-                        ${memberId}, 
-                        NOW(), 
-                        "event", 
-                        ${activity.eventDetails.eventIssueId}
-                    )
-                    RETURNING * `;
+                      await sql``;
                     }
                     break;
                   
                   case "status":
+                    if(activity.eventDetails.eventType === "add") {
+                      await sql``;
+                    } else {
+                      await sql``;
+                    }
+                    break;
+                  
+                  case "label":
                     if(activity.eventDetails.eventType === "add") {
                       await sql`INSERT INTO "Activity" (
                         "ActivityId", 
@@ -427,31 +392,8 @@ function initializeWebSocketServer(server) {
                         "ActivityTime", 
                         "Type", 
                         "IssueId"
-                    ) 
-                    VALUES (
-                        uuid_generate_v4(), 
-                        ${activity.eventDetails.eventInfo},
-                        NULL, 
-                        ${memberId}, 
-                        NOW(), 
-                        "event", 
-                        ${activity.eventDetails.eventIssueId}
-                    )
-                    RETURNING * `;
-                    await sql `UPDATE "Issue"
-                    SET "IssueStatus" = ${activity.eventDetails.newStatus}
-                    WHERE "IssueId" = ${activity.eventDetails.eventIssueId}
-                    RETURNING *`
-                    } else {
-                      await sql`INSERT INTO "Activity" (
-                        "ActivityId", 
-                        "ActivityDesc", 
-                        "ReplyTo", 
-                        "MemberId", 
-                        "ActivityTime", 
-                        "Type", 
-                        "IssueId"
-                    ) 
+                      ) 
+
                     VALUES (
                         uuid_generate_v4(), 
                         ${activity.eventDetails.eventInfo},
@@ -460,20 +402,40 @@ function initializeWebSocketServer(server) {
                         NOW(), 
                         "event", 
                         ${activity.eventDetails.IssueId}
-                    )
-                    RETURNING * `;
+                      )
+                    RETURNING *`;
 
-                    await sql `SET "IssueStatus" = NULL
-                    WHERE "IssueId" = ${activity.eventDetails.eventIssueId}
-                    RETURNING *`
-                    }
-                    break;
-                  
-                  case "label":
-                    if(activity.eventDetails.eventType === "add") {
-                      await sql``;
+                    await sql`UPDATE "Issue"
+                              SET "IssueLabel" = ${action.detail.issueLabel}
+                              WHERE "IssueId" = ${action.detail.issueId}
+                              RETURNING *`;
+
                     } else {
-                      await sql``;
+                      await sql`INSERT INTO "Activity" (
+                        "ActivityId", 
+                        "ActivityDesc", 
+                        "ReplyTo", 
+                        "MemberId", 
+                        "ActivityTime", 
+                        "Type", 
+                        "IssueId"
+                      ) 
+
+                    VALUES (
+                        uuid_generate_v4(), 
+                        ${activity.eventDetails.eventInfo},
+                        NULL, 
+                        ${memberId}, 
+                        NOW(), 
+                        "event", 
+                        ${activity.eventDetails.IssueId}
+                      )
+                    RETURNING *`;
+
+                    await sql`UPDATE "Issue"
+                              SET "IssueLabel" = ${action.detail.issueLabel}
+                              WHERE "IssueId" = ${action.detail.issueId}
+                              RETURNING *`;
                     }
                     break;
 
