@@ -348,144 +348,231 @@ function initializeWebSocketServer(server) {
               }
             }
             if (isActivity) {
-                                  /* Activity: {isComment: true ya false, 
-                                                isEvent: true ya false,
-                                                commentDetails: agr isComment true rha to {},
-                                                eventDetails: agr isEvent true rha to {
-                                                eventSet: anyone of values "milestone", "status", "label", "assign" (bascically enums)
-                                                eventType: anyone of values "add" or "remove",
-                                                eventInfo: yaha pe string hoga jo btayega is event ko
-                                                newStatus:
-                                                newLabel:
-                                                newAssigned:
-                                                eventIssueId:
-                                                eventmemberId: //ye member id kaha se lana hai wahi dekhna hai. mtlb frontend se backend me kaise bhejna hai
-                                                }
-                                  } */
-              if(isComment) {
-                // commments and replies se deal krna hai
+              /* Activity: {isComment: true ya false, 
+                            isEvent: true ya false,
+                            commentDetails: agr isComment true rha to {},
+                            eventDetails: agr isEvent true rha to {
+                            eventSet: anyone of values "milestone", "status", "label", "assign" (bascically enums)
+                            eventType: anyone of values "add" or "remove",
+                            eventInfo: yaha pe string hoga jo btayega is event ko
+                            newStatus:
+                            newLabel:
+                            newAssigned:
+                            eventIssueId:
+                            eventmemberId: //ye member id kaha se lana hai wahi dekhna hai. mtlb frontend se backend me kaise bhejna hai
+                            }
+              } */
+            if(isComment) {
+            // commments and replies se deal krna hai
 
+            }
+            if (isEvent) {
+              // events se deal karenge. example: gitesh created this issue. rajeev added december milestone to this issue. rajeev removed the september lable from this issue
+              // milestone, status, label, assign
+              switch (activity.eventDetails.eventSet) {
+                case "milestone":
+                  if (activity.eventDetails.eventType === "add") {
+                    await sql`
+              INSERT INTO "Activity" (
+                "ActivityId", 
+                "ActivityDesc", 
+                "ReplyTo", 
+                "MemberId", 
+                "ActivityTime", 
+                "Type", 
+                "IssueId"
+            ) 
+            VALUES (
+                uuid_generate_v4(), 
+                ${activity.eventDetails.eventInfo},
+                NULL, 
+                ${memberId}, 
+                NOW(), 
+                "event", 
+                ${activity.eventDetails.eventIssueId}
+            )
+            RETURNING * `;
+                  } else {
+                    await sql`
+                INSERT INTO "Activity" (
+                "ActivityId", 
+                "ActivityDesc", 
+                "ReplyTo", 
+                "MemberId", 
+                "ActivityTime", 
+                "Type", 
+                "IssueId"
+            ) 
+            VALUES (
+                uuid_generate_v4(), 
+                ${activity.eventDetails.eventInfo},
+                NULL, 
+                ${memberId}, 
+                NOW(), 
+                "event", 
+                ${activity.eventDetails.eventIssueId}
+            )
+            RETURNING * `;
+                  }
+                  break;
+
+                case "status":
+                  if (activity.eventDetails.eventType === "add") {
+                    await sql`INSERT INTO "Activity" (
+                "ActivityId", 
+                "ActivityDesc", 
+                "ReplyTo", 
+                "MemberId", 
+                "ActivityTime", 
+                "Type", 
+                "IssueId"
+            ) 
+            VALUES (
+                uuid_generate_v4(), 
+                ${activity.eventDetails.eventInfo},
+                NULL, 
+                ${memberId}, 
+                NOW(), 
+                "event", 
+                ${activity.eventDetails.eventIssueId}
+            )
+            RETURNING * `;
+                    await sql`UPDATE "Issue"
+            SET "IssueStatus" = ${activity.eventDetails.newStatus}
+            WHERE "IssueId" = ${activity.eventDetails.eventIssueId}
+            RETURNING *`;
+                  } else {
+                    await sql`INSERT INTO "Activity" (
+                "ActivityId", 
+                "ActivityDesc", 
+                "ReplyTo", 
+                "MemberId", 
+                "ActivityTime", 
+                "Type", 
+                "IssueId"
+            ) 
+            VALUES (
+                uuid_generate_v4(), 
+                ${activity.eventDetails.eventInfo},
+                NULL, 
+                ${memberId}, 
+                NOW(), 
+                "event", 
+                ${activity.eventDetails.IssueId}
+            )
+            RETURNING * `;
+
+                    await sql`SET "IssueStatus" = NULL
+            WHERE "IssueId" = ${activity.eventDetails.eventIssueId}
+            RETURNING *`;
+                  }
+                  break;
+
+                case "label":
+                  if (activity.eventDetails.eventType === "add") {
+                    await sql`INSERT INTO "Activity" (
+                "ActivityId", 
+                "ActivityDesc", 
+                "ReplyTo", 
+                "MemberId", 
+                "ActivityTime", 
+                "Type", 
+                "IssueId"
+            ) 
+            VALUES (
+                uuid_generate_v4(), 
+                ${activity.eventDetails.eventInfo},
+                NULL, 
+                ${memberId}, 
+                NOW(), 
+                "event", 
+                ${activity.eventDetails.eventIssueId}
+            )
+            RETURNING * `;
+                    await sql`UPDATE "Issue"
+            SET "IssueLabel" = ${activity.eventDetails.newLabel}
+            WHERE "IssueId" = ${activity.eventDetails.eventIssueId}
+            RETURNING *`;
+                  } else {
+                    await sql`INSERT INTO "Activity" (
+                "ActivityId", 
+                "ActivityDesc", 
+                "ReplyTo", 
+                "MemberId", 
+                "ActivityTime", 
+                "Type", 
+                "IssueId"
+            ) 
+            VALUES (
+                uuid_generate_v4(), 
+                ${activity.eventDetails.eventInfo},
+                NULL, 
+                ${memberId}, 
+                NOW(), 
+                "event", 
+                ${activity.eventDetails.IssueId}
+            )
+            RETURNING * `;
+
+                    await sql`SET "IssueLabel" = NULL
+            WHERE "IssueId" = ${activity.eventDetails.eventIssueId}
+            RETURNING *`;
+                  }
+                  break;
+
+                case "assign":
+                  if (activity.eventDetails.eventType === "add") {
+                    await sql`INSERT INTO "Activity" (
+                "ActivityId", 
+                "ActivityDesc", 
+                "ReplyTo", 
+                "MemberId", 
+                "ActivityTime", 
+                "Type", 
+                "IssueId"
+            ) 
+            VALUES (
+                uuid_generate_v4(), 
+                ${activity.eventDetails.eventInfo},
+                NULL, 
+                ${memberId}, 
+                NOW(), 
+                "event", 
+                ${activity.eventDetails.eventIssueId}
+            )
+            RETURNING * `;
+                    await sql`UPDATE "Issue"
+            SET "Assigned" = ${activity.eventDetails.newAssigned}
+            WHERE "IssueId" = ${activity.eventDetails.eventIssueId}
+            RETURNING *`;
+                  } else {
+                    await sql`INSERT INTO "Activity" (
+                "ActivityId", 
+                "ActivityDesc", 
+                "ReplyTo", 
+                "MemberId", 
+                "ActivityTime", 
+                "Type", 
+                "IssueId"
+            ) 
+            VALUES (
+                uuid_generate_v4(), 
+                ${activity.eventDetails.eventInfo},
+                NULL, 
+                ${memberId}, 
+                NOW(), 
+                "event", 
+                ${activity.eventDetails.IssueId}
+            )
+            RETURNING * `;
+
+                    await sql`SET "Assigned" = NULL
+            WHERE "IssueId" = ${activity.eventDetails.eventIssueId}
+            RETURNING *`;
+                  }
+                  break;
               }
-              if(isEvent) {
-                
-                // events se deal karenge. example: gitesh created this issue. rajeev added december milestone to this issue. rajeev removed the september lable from this issue
-                // milestone, status, label, assign
-                switch(activity.eventDetails.eventSet){
-                  case "milestone":
-                    if(activity.eventDetails.eventType === "add") {
-                      await sql`
-                      INSERT INTO "Activity" (
-                        "ActivityId", 
-                        "ActivityDesc", 
-                        "ReplyTo", 
-                        "MemberId", 
-                        "ActivityTime", 
-                        "Type", 
-                        "IssueId"
-                    ) 
-                    VALUES (
-                        uuid_generate_v4(), 
-                        ${activity.eventDetails.eventInfo},
-                        NULL, 
-                        ${memberId}, 
-                        NOW(), 
-                        "event", 
-                        ${activity.eventDetails.eventIssueId}
-                    )
-                    RETURNING * `;
-                    } else {
-                      await sql`
-                        INSERT INTO "Activity" (
-                        "ActivityId", 
-                        "ActivityDesc", 
-                        "ReplyTo", 
-                        "MemberId", 
-                        "ActivityTime", 
-                        "Type", 
-                        "IssueId"
-                    ) 
-                    VALUES (
-                        uuid_generate_v4(), 
-                        ${activity.eventDetails.eventInfo},
-                        NULL, 
-                        ${memberId}, 
-                        NOW(), 
-                        "event", 
-                        ${activity.eventDetails.eventIssueId}
-                    )
-                    RETURNING * `;
-                    }
-                    break;
-                  
-                  case "status":
-                    if(activity.eventDetails.eventType === "add") {
-                      await sql`INSERT INTO "Activity" (
-                        "ActivityId", 
-                        "ActivityDesc", 
-                        "ReplyTo", 
-                        "MemberId", 
-                        "ActivityTime", 
-                        "Type", 
-                        "IssueId"
-                    ) 
-                    VALUES (
-                        uuid_generate_v4(), 
-                        ${activity.eventDetails.eventInfo},
-                        NULL, 
-                        ${memberId}, 
-                        NOW(), 
-                        "event", 
-                        ${activity.eventDetails.eventIssueId}
-                    )
-                    RETURNING * `;
-                    await sql `UPDATE "Issue"
-                    SET "IssueStatus" = ${activity.eventDetails.newStatus}
-                    WHERE "IssueId" = ${activity.eventDetails.eventIssueId}
-                    RETURNING *`
-                    } else {
-                      await sql`INSERT INTO "Activity" (
-                        "ActivityId", 
-                        "ActivityDesc", 
-                        "ReplyTo", 
-                        "MemberId", 
-                        "ActivityTime", 
-                        "Type", 
-                        "IssueId"
-                    ) 
-                    VALUES (
-                        uuid_generate_v4(), 
-                        ${activity.eventDetails.eventInfo},
-                        NULL, 
-                        ${memberId}, 
-                        NOW(), 
-                        "event", 
-                        ${activity.eventDetails.IssueId}
-                    )
-                    RETURNING * `;
-
-                    await sql `SET "IssueStatus" = NULL
-                    WHERE "IssueId" = ${activity.eventDetails.eventIssueId}
-                    RETURNING *`
-                    }
-                    break;
-                  
-                  case "label":
-                    if(activity.eventDetails.eventType === "add") {
-                      await sql``;
-                    } else {
-                      await sql``;
-                    }
-                    break;
-
-                  case "assign":
-                    if(activity.eventDetails.eventType === "add") {
-                      await sql``;
-                    } else {
-                      await sql``;
-                    }
-                    break;
-                }
-              }
+            }
             }
             if (isAction) {
               if (action.subField === "assignIssueTo") {
