@@ -59,7 +59,7 @@ export default function Waitlist() {
         <div className="relative z-10 flex w-full  flex-col justify-start items-center gap-2">
 
           <p className="md:text-xl border-2 p-4 rounded-full border-gray-600 text-sm text-gray-300 font-semibold my-4">
-            join the wailist
+            join the waitlist
           </p>
 
         </div>
