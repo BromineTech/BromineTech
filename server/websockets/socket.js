@@ -347,7 +347,7 @@ function initializeWebSocketServer(server) {
                           AND "DNS"."url" = ${ws.projectId}`;
               }
             }
-            if (isActivity) {
+            if (isActivity) { // yaha pe sirf Activity table ke sath chhedkhni hoga. baki chize isAction ke andr hongi, jo ki iske niche likha hai just
               /* Activity: {isComment: true ya false, 
                             isEvent: true ya false,
                             commentDetails: agr isComment true rha to {},
@@ -362,220 +362,116 @@ function initializeWebSocketServer(server) {
                             eventmemberId: //ye member id kaha se lana hai wahi dekhna hai. mtlb frontend se backend me kaise bhejna hai
                             }
               } */
+
+              
             if(isComment) {
             // commments and replies se deal krna hai
+
+
 
             }
             if (isEvent) {
               // events se deal karenge. example: gitesh created this issue. rajeev added december milestone to this issue. rajeev removed the september lable from this issue
               // milestone, status, label, assign
               switch (activity.eventDetails.eventSet) {
-                case "milestone":
-                  if (activity.eventDetails.eventType === "add") {
+                case "milestone":  // yaha pe milestone ki activities ayengi (rajeev added/removed xyz miletsone to this issue)
                     await sql`
-              INSERT INTO "Activity" (
-                "ActivityId", 
-                "ActivityDesc", 
-                "ReplyTo", 
-                "MemberId", 
-                "ActivityTime", 
-                "Type", 
-                "IssueId"
-            ) 
-            VALUES (
-                uuid_generate_v4(), 
-                ${activity.eventDetails.eventInfo},
-                NULL, 
-                ${memberId}, 
-                NOW(), 
-                "event", 
-                ${activity.eventDetails.eventIssueId}
-            )
-            RETURNING * `;
-                  } else {
-                    await sql`
-                INSERT INTO "Activity" (
-                "ActivityId", 
-                "ActivityDesc", 
-                "ReplyTo", 
-                "MemberId", 
-                "ActivityTime", 
-                "Type", 
-                "IssueId"
-            ) 
-            VALUES (
-                uuid_generate_v4(), 
-                ${activity.eventDetails.eventInfo},
-                NULL, 
-                ${memberId}, 
-                NOW(), 
-                "event", 
-                ${activity.eventDetails.eventIssueId}
-            )
-            RETURNING * `;
-                  }
+                              INSERT INTO "Activity" (
+                                "ActivityId", 
+                                "ActivityDesc", 
+                                "ReplyTo", 
+                                "MemberId", 
+                                "ActivityTime", 
+                                "Type", 
+                                "IssueId"
+                                ) 
+                                VALUES (
+                                    uuid_generate_v4(), 
+                                    ${activity.eventDetails.eventInfo},
+                                    NULL, 
+                                    ${memberId}, 
+                                    NOW(), 
+                                    "event", 
+                                    ${activity.eventDetails.eventIssueId}
+                                )
+                                RETURNING * `;
+                // iska action isAction wale block me handle ho rha hai. mtlb milestone table usme update ho rha hai.
                   break;
 
                 case "status":
-                  if (activity.eventDetails.eventType === "add") {
+                  
                     await sql`INSERT INTO "Activity" (
-                "ActivityId", 
-                "ActivityDesc", 
-                "ReplyTo", 
-                "MemberId", 
-                "ActivityTime", 
-                "Type", 
-                "IssueId"
-            ) 
-            VALUES (
-                uuid_generate_v4(), 
-                ${activity.eventDetails.eventInfo},
-                NULL, 
-                ${memberId}, 
-                NOW(), 
-                "event", 
-                ${activity.eventDetails.eventIssueId}
-            )
-            RETURNING * `;
-                    await sql`UPDATE "Issue"
-            SET "IssueStatus" = ${activity.eventDetails.newStatus}
-            WHERE "IssueId" = ${activity.eventDetails.eventIssueId}
-            RETURNING *`;
-                  } else {
-                    await sql`INSERT INTO "Activity" (
-                "ActivityId", 
-                "ActivityDesc", 
-                "ReplyTo", 
-                "MemberId", 
-                "ActivityTime", 
-                "Type", 
-                "IssueId"
-            ) 
-            VALUES (
-                uuid_generate_v4(), 
-                ${activity.eventDetails.eventInfo},
-                NULL, 
-                ${memberId}, 
-                NOW(), 
-                "event", 
-                ${activity.eventDetails.IssueId}
-            )
-            RETURNING * `;
-
-                    await sql`SET "IssueStatus" = NULL
-            WHERE "IssueId" = ${activity.eventDetails.eventIssueId}
-            RETURNING *`;
-                  }
+                              "ActivityId", 
+                              "ActivityDesc", 
+                              "ReplyTo", 
+                              "MemberId", 
+                              "ActivityTime", 
+                              "Type", 
+                              "IssueId"
+                              ) 
+                              VALUES (
+                                  uuid_generate_v4(), 
+                                  ${activity.eventDetails.eventInfo},
+                                  NULL, 
+                                  ${memberId}, 
+                                  NOW(), 
+                                  "event", 
+                                  ${activity.eventDetails.eventIssueId}
+                              )
+                              RETURNING * `;
+                              // iska action isAction me handle ho rha hai. mtlb Issue table me IssueStatus us block me update ho rha hai
                   break;
 
                 case "label":
-                  if (activity.eventDetails.eventType === "add") {
                     await sql`INSERT INTO "Activity" (
-                "ActivityId", 
-                "ActivityDesc", 
-                "ReplyTo", 
-                "MemberId", 
-                "ActivityTime", 
-                "Type", 
-                "IssueId"
-            ) 
-            VALUES (
-                uuid_generate_v4(), 
-                ${activity.eventDetails.eventInfo},
-                NULL, 
-                ${memberId}, 
-                NOW(), 
-                "event", 
-                ${activity.eventDetails.eventIssueId}
-            )
-            RETURNING * `;
-                    await sql`UPDATE "Issue"
-            SET "IssueLabel" = ${activity.eventDetails.newLabel}
-            WHERE "IssueId" = ${activity.eventDetails.eventIssueId}
-            RETURNING *`;
-                  } else {
-                    await sql`INSERT INTO "Activity" (
-                "ActivityId", 
-                "ActivityDesc", 
-                "ReplyTo", 
-                "MemberId", 
-                "ActivityTime", 
-                "Type", 
-                "IssueId"
-            ) 
-            VALUES (
-                uuid_generate_v4(), 
-                ${activity.eventDetails.eventInfo},
-                NULL, 
-                ${memberId}, 
-                NOW(), 
-                "event", 
-                ${activity.eventDetails.IssueId}
-            )
-            RETURNING * `;
-
-                    await sql`SET "IssueLabel" = NULL
-            WHERE "IssueId" = ${activity.eventDetails.eventIssueId}
-            RETURNING *`;
-                  }
+                              "ActivityId", 
+                              "ActivityDesc", 
+                              "ReplyTo", 
+                              "MemberId", 
+                              "ActivityTime", 
+                              "Type", 
+                              "IssueId"
+                              ) 
+                              VALUES (
+                                  uuid_generate_v4(), 
+                                  ${activity.eventDetails.eventInfo},
+                                  NULL, 
+                                  ${memberId}, 
+                                  NOW(), 
+                                  "event", 
+                                  ${activity.eventDetails.eventIssueId}
+                              )
+                              RETURNING * `;
+                              // iska Action apn isAction wale block me handle kr rhe hai. mtlb IssueLabel us block me update kr rhe hai
                   break;
 
                 case "assign":
-                  if (activity.eventDetails.eventType === "add") {
                     await sql`INSERT INTO "Activity" (
-                "ActivityId", 
-                "ActivityDesc", 
-                "ReplyTo", 
-                "MemberId", 
-                "ActivityTime", 
-                "Type", 
-                "IssueId"
-            ) 
-            VALUES (
-                uuid_generate_v4(), 
-                ${activity.eventDetails.eventInfo},
-                NULL, 
-                ${memberId}, 
-                NOW(), 
-                "event", 
-                ${activity.eventDetails.eventIssueId}
-            )
-            RETURNING * `;
-                    await sql`UPDATE "Issue"
-            SET "Assigned" = ${activity.eventDetails.newAssigned}
-            WHERE "IssueId" = ${activity.eventDetails.eventIssueId}
-            RETURNING *`;
-                  } else {
-                    await sql`INSERT INTO "Activity" (
-                "ActivityId", 
-                "ActivityDesc", 
-                "ReplyTo", 
-                "MemberId", 
-                "ActivityTime", 
-                "Type", 
-                "IssueId"
-            ) 
-            VALUES (
-                uuid_generate_v4(), 
-                ${activity.eventDetails.eventInfo},
-                NULL, 
-                ${memberId}, 
-                NOW(), 
-                "event", 
-                ${activity.eventDetails.IssueId}
-            )
-            RETURNING * `;
-
-                    await sql`SET "Assigned" = NULL
-            WHERE "IssueId" = ${activity.eventDetails.eventIssueId}
-            RETURNING *`;
-                  }
+                              "ActivityId", 
+                              "ActivityDesc", 
+                              "ReplyTo", 
+                              "MemberId", 
+                              "ActivityTime", 
+                              "Type", 
+                              "IssueId"
+                              ) 
+                              VALUES (
+                                  uuid_generate_v4(), 
+                                  ${activity.eventDetails.eventInfo},
+                                  NULL, 
+                                  ${memberId}, 
+                                  NOW(), 
+                                  "event", 
+                                  ${activity.eventDetails.eventIssueId}
+                              )
+                              RETURNING * `;
+                    // isAction wale if statement me iska action handle ho rha hai. Issue table update usme ho rha hai.
                   break;
               }
             }
             }
             if (isAction) {
-              if (action.subField === "assignIssueTo") {
+              if (action.subField === "assignIssueTo") { // ye assign kr rha hai ki kisko dena hai issue
                 switch (action.type) {
 
                   case "add":
@@ -595,7 +491,48 @@ function initializeWebSocketServer(server) {
                     break;
                 }
               }
-              if (action.subField === "assignSubIssueTo") {
+
+              if (action.subField === "status") { // yha pe issue me status asdd ya remove kr rhe hai
+                switch (action.type) {
+
+                  case "add":
+                    await sql`UPDATE "Issue"
+                              SET "IssueStatus" = ${action.detail.newStatus}
+                              WHERE "ProjectId" = ${ws.projectId}
+                              AND "IssueId" = ${action.detail.issueId}
+                              RETURNING *`;
+                    break;
+
+                  case "delete":
+                    await sql`UPDATE "Issue"
+                              SET "IssueStatus" = ${null}
+                              WHERE "ProjectId" = ${ws.projectId}
+                              AND "IssueId" = ${action.detail.issueId}
+                              RETURNING *`;
+                    break;
+                }
+              }
+              if (action.subField === "label") { // yha pe issue me status asdd ya remove kr rhe hai
+                switch (action.type) {
+
+                  case "add":
+                    await sql`UPDATE "Issue"
+                              SET "IssueLabel" = ${action.detail.newLabel}
+                              WHERE "ProjectId" = ${ws.projectId}
+                              AND "IssueId" = ${action.detail.issueId}
+                              RETURNING *`;
+                    break;
+
+                  case "delete":
+                    await sql`UPDATE "Issue"
+                              SET "IssueLabel" = ${null}
+                              WHERE "ProjectId" = ${ws.projectId}
+                              AND "IssueId" = ${action.detail.issueId}
+                              RETURNING *`;
+                    break;
+                }
+              }
+              if (action.subField === "assignSubIssueTo") { // yaha pe apn subIssue kisi person ko assign krte hai
                 switch (action.type) {
 
                   case "add":
@@ -615,7 +552,7 @@ function initializeWebSocketServer(server) {
                     break;
                 }
               }
-              if (action.subField === "milestone") {
+              if (action.subField === "milestone") {  //assign a milestone to this issue
                 switch (action.type) {
 
                   case "add":
@@ -635,7 +572,7 @@ function initializeWebSocketServer(server) {
                     break;
                 }
               }
-              if (action.subField === "subIssue") {
+              if (action.subField === "subIssue") {    // yaha pe child issue ka parent issue choose krna hai.
                 switch (action.type) {
 
                   case "add":
