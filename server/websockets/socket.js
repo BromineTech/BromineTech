@@ -366,7 +366,43 @@ function initializeWebSocketServer(server) {
               
             if(isComment) {
             // commments and replies se deal krna hai
+              switch (activity.commentDetails.operation) {
+                case "add":
+                    await sql`
+                    INSERT INTO "Activity" (
+                      "ActivityId", 
+                      "ActivityDesc", 
+                      "ReplyTo", 
+                      "MemberId", 
+                      "ActivityTime", 
+                      "Type", 
+                      "IssueId"
+                      ) 
+                      VALUES (
+                          uuid_generate_v4(), 
+                          ${activity.commentDetails.comment},
+                          NULL, 
+                          ${activity.commentDetails.memberId}, 
+                          NOW(), 
+                          "comment", 
+                          ${activity.commentDetails.eventIssueId}
+                      )
+                      RETURNING * `;
+                  break;
+                ////////////
+                ////////////
+                ///SecVul///
+                ////////////
+                ////////////
+                case "delete":
+                  await sql`
+                    DELETE FROM "Activity"
+                    WHERE "ActivityId" = ${activity.commentDetails.activityId} 
+                    AND "MemberId" = ${activity.commentDetails.memberId}
+                    RETURNING *`;
+                  break;
 
+              }
 
 
             }
