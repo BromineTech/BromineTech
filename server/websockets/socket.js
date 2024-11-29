@@ -385,7 +385,7 @@ function initializeWebSocketServer(server) {
                           ${activity.commentDetails.memberId}, 
                           NOW(), 
                           "comment", 
-                          ${activity.commentDetails.eventIssueId}
+                          ${activity.commentDetails.issueId}
                       )
                       RETURNING * `;
                   break;
