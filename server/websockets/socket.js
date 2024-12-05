@@ -348,25 +348,58 @@ function initializeWebSocketServer(server) {
               }
             }
             if (isActivity) { // yaha pe sirf Activity table ke sath chhedkhni hoga. baki chize isAction ke andr hongi, jo ki iske niche likha hai just
-              /* Activity: {isComment: true ya false, 
-                            isEvent: true ya false,
-                            commentDetails: agr isComment true rha to {},
-                            eventDetails: agr isEvent true rha to {
-                            eventSet: anyone of values "milestone", "status", "label", "assign" (bascically enums)
-                            eventType: anyone of values "add" or "remove",
-                            eventInfo: yaha pe string hoga jo btayega is event ko
-                            newStatus:
-                            newLabel:
-                            newAssigned:
-                            eventIssueId:
-                            eventmemberId: //ye member id kaha se lana hai wahi dekhna hai. mtlb frontend se backend me kaise bhejna hai
-                            }
+              /* activity: {isComment: true ya false, 
+              isEvent: true ya false,
+              commentDetails: {operation:(add ya delete), comment, memberId, activityId, issueId} agr isComment true rha to,
+              eventDetails: {eventSet, eventInfo, eventIssueId, eventType, eventmemberId} agr isEvent true rha to 
+                                    eventSet: anyone of values "milestone", "status", "label", "assign" (bascically enums)
+                                    eventType: anyone of values "add" or "remove",
+                                    eventInfo: yaha pe string hoga jo btayega is event ko
+
+                                    eventIssueId:
+                                    eventmemberId: //ye member id kaha se lana hai wahi dekhna hai. mtlb frontend se backend me kaise bhejna hai},
               } */
 
               
             if(isComment) {
             // commments and replies se deal krna hai
+              switch (activity.commentDetails.operation) {
+                case "add":
+                    await sql`
+                    INSERT INTO "Activity" (
+                      "ActivityId", 
+                      "ActivityDesc", 
+                      "ReplyTo", 
+                      "MemberId", 
+                      "ActivityTime", 
+                      "Type", 
+                      "IssueId"
+                      ) 
+                      VALUES (
+                          uuid_generate_v4(), 
+                          ${activity.commentDetails.comment},
+                          NULL, 
+                          ${activity.commentDetails.memberId}, 
+                          NOW(), 
+                          "comment", 
+                          ${activity.commentDetails.issueId}
+                      )
+                      RETURNING * `;
+                  break;
+                ////////////
+                ////////////
+                ///SecVul///
+                ////////////
+                ////////////
+                case "delete":
+                  await sql`
+                    DELETE FROM "Activity"
+                    WHERE "ActivityId" = ${activity.commentDetails.activityId} 
+                    AND "MemberId" = ${activity.commentDetails.memberId}
+                    RETURNING *`;
+                  break;
 
+              }
 
 
             }
