@@ -16,6 +16,24 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      colors: {
+        background: {
+          DEFAULT: '#0A0A0A'
+        },
+        sidebar: {
+          DEFAULT: '#010101'
+        },
+        tile: {
+          DEFAULT: '#19191990',
+          hover: '#191919'
+        },
+        button: {
+          hover: '#320F0B90'
+        },
+        border: {
+          button: '#27272A'
+        }
+      },
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
         "gradient-conic":
