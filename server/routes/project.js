@@ -7,12 +7,10 @@ const sql = require('../dbConfig');
 const getRandomString = require('../utils/randomString');
 const getDbId = require('../middlewares/getDbId');
 
-
 //future feartures
 /////////////////////////////////////////////////////////////////////////
 // search funcitonalioty daalna hai aur recent activity frontend me dikhana hai aur inbox wala feature bhi dalna hai aur ragbot bhi banana hai
 ////////////////////////////////////////////////////////////////////////
-
 
 
 // zod schemas
@@ -152,7 +150,7 @@ router.get('/:projectUrlId/issue/:issueId', requiresAuth(), getDbId, async (req,
         a."ReplyTo", a."MemberId", a."ActivityTime", u2."UserName" AS "ActivityUserName"
       FROM "User" u
       JOIN "Member" mb ON u."UserId" = mb."UserId"
-      JOIN "Project" p ON mb."ProjectId" = p."ProjectId"
+      JOIN "Project" p ON mb."ProjectId" = p."ProjectId"  
       JOIN "Issue" i ON p."ProjectId" = i."ProjectId"
       LEFT JOIN "Milestone" m ON i."MilestoneId" = m."MilestoneId"
       JOIN "Activity" a ON i."IssueId" = a."IssueId"
