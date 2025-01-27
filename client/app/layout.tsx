@@ -36,10 +36,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.className} h-[100vh] overflow-hidden w-full dark:bg-black bg-black bg-grid-white/[0.2] relative`}>
-        <nav className="w-full h-18 flex justify-between py-4 px-6">
-        <h1 className="text-3xl bg-gradient-to-br from-gray-400 via-white via-50% to-black text-transparent bg-clip-text font-bold text-left relative">bromine</h1>
-        </nav>
+      {/* light and dark theme to be integrated */}
+      <body className={`${inter.className} h-[100vh] overflow-hidden w-full relative`}>
         {children}
         </body>
     </html>

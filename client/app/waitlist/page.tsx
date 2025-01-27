@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { BackgroundBeams } from "@/components/lightBeamBg";
 import { PlaceholdersAndVanishInput } from "@/components/placeholdersvanishandinput"
 import { Toaster, toast } from 'sonner';
+import Link from "next/link";
 
 
 export default function Waitlist() {
@@ -52,8 +53,11 @@ export default function Waitlist() {
   };
 
   return (
-  
-    <div className="flex relative w-full h-screen justify-center  items-start mt-10">
+  <div className="flex flex-col justify-center items-center bg-grid-white/[0.2] w-full">
+          <nav className="w-full h-18 flex justify-between py-4 px-6">
+        <h1 className="text-3xl bg-gradient-to-br from-gray-400 via-white via-50% to-black text-transparent bg-clip-text font-bold text-left relative">bromine</h1>
+        </nav>
+    <div className="flex relative w-full h-screen justify-center items-start">
       <BackgroundBeams />
       <div className="Globe flex flex-col gap-4 py-4 ">
         <div className="relative z-10 flex w-full  flex-col justify-start items-center gap-2">
@@ -61,6 +65,7 @@ export default function Waitlist() {
           <p className="md:text-xl border-2 p-4 rounded-full border-gray-600 text-sm text-gray-300 font-semibold my-4">
             join the waitlist
           </p>
+          <button><Link href={"/project/all"}>projects</Link></button>
 
         </div>
         <div className=" flex flex-col gap-4 justify-center items-center">
@@ -84,6 +89,7 @@ export default function Waitlist() {
       </div>
       <Toaster />
       
+    </div>
     </div>
     
     
