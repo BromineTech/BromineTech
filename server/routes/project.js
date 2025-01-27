@@ -406,3 +406,8 @@ router.post('/:projectUrlId/updateMemberRole', requiresAuth(), getDbId, async (r
   });
 
 module.exports = router;
+
+
+app.get('/', (req, res) => {
+  res.send('WebSocket Server is running!');
+});
