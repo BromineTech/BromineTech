@@ -1,5 +1,6 @@
 "use client";
 import { AppSidebar } from "@/components/Sidebar";
+import { ProjectDashboard } from "@/components/ProjectTiles";
 import { useState } from "react";
 import InviteMembersDialog from "@/components/PopUpEmail";
 import Navbar from '@/components/Navbar';
@@ -48,9 +49,15 @@ export default function Home() {
         </div>
       </div>
     </div>
+    
     // <main className="flex min-h-screen flex-col items-center justify-center p-4 bg-black">
     //   <Navbar />
     // </main>
+
+    // <div className="flex h-screen bg-[#0a0a0a]">
+    //   <AppSidebar />
+    //   <ProjectDashboard />
+    // </div>
 
     // <div className="flex bg-[#121216]">
     //   <AppSidebar/>
