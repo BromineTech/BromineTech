@@ -1,12 +1,10 @@
+import type { Config } from "tailwindcss";
 const defaultTheme = require("tailwindcss/defaultTheme");
 const svgToDataUri = require("mini-svg-data-uri");
 const colors = require("tailwindcss/colors");
 const {
   default: flattenColorPalette,
 } = require("tailwindcss/lib/util/flattenColorPalette");
- 
-
-import type { Config } from "tailwindcss";
 
 const config: Config = {
   content: [
@@ -18,30 +16,40 @@ const config: Config = {
     extend: {
       colors: {
         background: {
-          DEFAULT: '#0A0A0A'
+          DEFAULT: "#0A0A0A",
         },
         sidebar: {
-          DEFAULT: '#010101'
+          DEFAULT: "#010101",
         },
         tile: {
-          DEFAULT: '#19191990',
-          hover: '#191919'
+          DEFAULT: "#19191990",
+          hover: "#191919",
         },
         button: {
-          hover: '#320F0B90'
+          hover: "#320F0B90",
         },
         border: {
-          button: '#27272A'
-        }
+          button: "#27272A",
+        },
       },
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
         "gradient-conic":
           "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
       },
+      animation: {
+        shine: "shine 1s ease-in-out",
+      },
+      keyframes: {
+        shine: {
+          "0%": { left: "-125%" },
+          "100%": { left: "125%" },
+        },
+      },
     },
   },
-  plugins: [addVariablesForColors,
+  plugins: [
+    addVariablesForColors,
     function ({ matchUtilities, theme }: any) {
       matchUtilities(
         {
@@ -72,9 +80,10 @@ function addVariablesForColors({ addBase, theme }: any) {
   let newVars = Object.fromEntries(
     Object.entries(allColors).map(([key, val]) => [`--${key}`, val])
   );
- 
+
   addBase({
     ":root": newVars,
   });
 }
+
 export default config;
