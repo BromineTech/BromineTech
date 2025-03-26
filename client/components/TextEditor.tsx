@@ -1,5 +1,5 @@
-"use client"
-import { locales } from "@blocknote/core";
+
+import { BlockNoteSchema, defaultBlockSpecs, defaultInlineContentSpecs, defaultStyleSpecs } from "@blocknote/core";
 import "@blocknote/core/fonts/inter.css";
 import { BlockNoteView } from "@blocknote/mantine";
 import "@blocknote/mantine/style.css";
@@ -14,27 +14,25 @@ interface TextEditorProps {
   type: EditorType;
 }
 
+
+
 export default function TextEditor({ type }: TextEditorProps) {
-  const locale = locales["en"];
+  const schema = BlockNoteSchema.create({
+    blockSpecs: defaultBlockSpecs,
+    inlineContentSpecs: defaultInlineContentSpecs,
+    styleSpecs: defaultStyleSpecs,
+  });
+
   const editor = useCreateBlockNote({
-    trailingBlock: false,
+    schema,
     initialContent: [
       {
         type: "heading",
+        props: { level: 1 },
         content: "Welcome to this demo!",
       },
     ],
-    dictionary: {
-      ...locale,
-      placeholders: {
-        ...locale.placeholders,
-        emptyDocument: "", // Remove placeholder for empty document
-        default: "",       // Remove default placeholder
-        heading: "",       // Remove heading placeholder
-      },
-    },
   });
-
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (type === EditorType.SingleLine && e.key === "Enter") {
@@ -42,6 +40,13 @@ export default function TextEditor({ type }: TextEditorProps) {
     }
   };
 
-
-  return <BlockNoteView editor={editor} formattingToolbar={false} slashMenu={false} sideMenu={false} onKeyDown={handleKeyDown} />;
+  return (
+    <BlockNoteView
+      editor={editor}
+      formattingToolbar={false}
+      slashMenu={false}
+      sideMenu={false}
+      onKeyDown={handleKeyDown}
+    />
+  );
 }
