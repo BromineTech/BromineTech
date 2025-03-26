@@ -77,8 +77,8 @@ export function ProjectDashboard() {
   }
 
   return (
-    <div className="flex-1 p-6 overflow-auto">
-      <div className="max-w-7xl mx-auto">
+    <div className="flex-1 px-2 py-6 overflow-auto">
+      <div className="max-w-8xl mx-auto">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-medium text-white">Your Projects</h1>
           <button

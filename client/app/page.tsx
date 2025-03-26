@@ -7,6 +7,7 @@ import Navbar from '@/components/Navbar';
 import { PropertiesSidebar } from "@/components/PropertiesSidebar"
 import Image from "next/image";
 import { redirect } from "next/navigation";
+import IssueTracker from "@/components/IssueTracker";
 export default function Home() {
   const [open, setOpen] = useState(false);
   const [isPropertiesOpen, setIsPropertiesOpen] = useState(true);
@@ -16,7 +17,7 @@ export default function Home() {
     <div className="flex h-screen bg-zinc-900">
       {/* Left Sidebar */}
       <AppSidebar />
-
+      
       {/* Main Content Wrapper */}
       <div className="flex flex-col flex-1">
         {/* Navbar: Full width, positioned after the sidebar */}
@@ -31,9 +32,12 @@ export default function Home() {
         {/* Content Area with Properties Sidebar */}
         <div className="flex flex-1">
           {/* Main Content Section */}
-          <div className="flex-1 p-6">
-            <h1 className="text-2xl font-semibold">Project Overview</h1>
+          <div className="flex-1 pr-2 pb-50">
+            <IssueTracker />
           </div>
+          {/* <div className="flex-1 p-6">
+            <h1 className="text-2xl font-semibold">Project Overview</h1>
+          </div> */}
 
           {/* Properties Sidebar (Only shown when toggled) */}
           {isPropertiesOpen && (
