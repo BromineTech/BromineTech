@@ -17,6 +17,7 @@ interface TextEditorProps {
 export default function TextEditor({ type }: TextEditorProps) {
   const locale = locales["en"];
   const editor = useCreateBlockNote({
+    trailingBlock: false,
     initialContent: [
       {
         type: "heading",
