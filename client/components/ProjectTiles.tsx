@@ -112,19 +112,6 @@ export function ProjectDashboard() {
                 <div>{project.targetDate}</div>
               </div>
             ))}
-
-            {/* Empty project slots */}
-            {/* {Array.from({ length: 3 }).map((_, index) => (
-              <div
-                key={`empty-${index}`}
-                className="grid grid-cols-4 p-4 text-transparent text-sm bg-neutral-900 rounded-md"
-              >
-                <div className="font-medium">placeholder</div>
-                <div>0</div>
-                <div>00.00.00</div>
-                <div>00.00.00</div>
-              </div>
-            ))} */}
           </div>
         </div>
       </div>
