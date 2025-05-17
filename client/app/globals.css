@@ -2,6 +2,23 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Single-line specific styles */
+.bn-editor[data-single-line] {
+  padding: 0 !important;
+  overflow: hidden;
+}
+
+.bn-editor[data-single-line] .bn-block-content {
+  min-height: 0 !important;
+  margin: 0 !important;
+}
+
+.bn-editor[data-single-line] .bn-inline-content {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 :root {
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 214, 219, 220;

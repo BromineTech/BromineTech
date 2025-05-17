@@ -9,6 +9,9 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@blocknote/core": "^0.26.0",
+    "@blocknote/mantine": "^0.26.0",
+    "@blocknote/react": "^0.26.0",
     "clsx": "^2.1.1",
     "cobe": "^0.6.3",
     "date-fns": "^4.1.0",
