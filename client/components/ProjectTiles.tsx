@@ -77,8 +77,8 @@ export function ProjectDashboard() {
   }
 
   return (
-    <div className="flex-1 p-6 overflow-auto">
-      <div className="max-w-7xl mx-auto">
+    <div className="flex-1 px-2 py-6 overflow-auto">
+      <div className="max-w-8xl mx-auto">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-medium text-white">Your Projects</h1>
           <button
@@ -112,19 +112,6 @@ export function ProjectDashboard() {
                 <div>{project.targetDate}</div>
               </div>
             ))}
-
-            {/* Empty project slots */}
-            {/* {Array.from({ length: 3 }).map((_, index) => (
-              <div
-                key={`empty-${index}`}
-                className="grid grid-cols-4 p-4 text-transparent text-sm bg-neutral-900 rounded-md"
-              >
-                <div className="font-medium">placeholder</div>
-                <div>0</div>
-                <div>00.00.00</div>
-                <div>00.00.00</div>
-              </div>
-            ))} */}
           </div>
         </div>
       </div>
