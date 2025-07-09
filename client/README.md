@@ -20,6 +20,27 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
 
+## Auth0 Integration
+
+This project uses [Auth0](https://auth0.com/) for authentication. To run locally, you must set up the following environment variables in a `.env.local` file in the `client/` directory:
+
+```
+AUTH0_SECRET=your-random-secret
+AUTH0_BASE_URL=http://localhost:3001
+AUTH0_ISSUER_BASE_URL=https://YOUR_AUTH0_DOMAIN
+AUTH0_CLIENT_ID=YOUR_AUTH0_CLIENT_ID
+AUTH0_CLIENT_SECRET=YOUR_AUTH0_CLIENT_SECRET
+```
+
+- You can generate a secret with: `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`
+- Get the other values from your Auth0 dashboard.
+
+## Auth0 Login/Logout
+- Login: `/api/auth/login`
+- Logout: `/api/auth/logout`
+
+See [Auth0 Next.js SDK Quickstart](https://auth0.com/docs/quickstart/webapp/nextjs) for more details.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
