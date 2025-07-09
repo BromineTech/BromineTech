@@ -3,17 +3,18 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --port 3001",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
   },
   "dependencies": {
-    "@blocknote/core": "^0.26.0",
-    "@blocknote/mantine": "^0.26.0",
-    "@blocknote/react": "^0.26.0",
+    "@tiptap/core": "^2.12.0",
+    "@tiptap/extension-collaboration": "^2.12.0",
+    "@tiptap/extension-collaboration-cursor": "^2.12.0",
+    "@tiptap/react": "^2.12.0",
+    "@tiptap/starter-kit": "^2.12.0",
     "clsx": "^2.1.1",
-    "cobe": "^0.6.3",
     "date-fns": "^4.1.0",
     "dotenv": "^16.4.5",
     "framer-motion": "^11.18.2",
@@ -24,6 +25,9 @@
     "react-dom": "^18",
     "sonner": "^1.5.0",
     "tailwind-merge": "^2.6.0",
+    "y-indexeddb": "^9.0.12",
+    "y-websocket": "^3.0.0",
+    "yjs": "^13.6.27",
     "zod": "^3.24.2"
   },
   "devDependencies": {
