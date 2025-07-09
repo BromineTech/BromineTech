@@ -26,6 +26,7 @@ const updateMemberSchema = z.object({
 // Get all projects
 router.get('/all', requiresAuth(), insertIntoUser, async (req, res) => {
   const email = req.oidc.user.email;
+  const token = req.oidc.idToken; // Get Auth0 token
   try {
     const allProjects = await sql`
       SELECT p."ProjectName", p."ProjectStatus", p."ProjectTarget", p."ProjectDescription"
@@ -34,7 +35,7 @@ router.get('/all', requiresAuth(), insertIntoUser, async (req, res) => {
       JOIN "Project" p ON m."ProjectId" = p."ProjectId"
       WHERE u."Email" = ${email};
     `;
-    res.json(allProjects);
+    res.json({token, projects: allProjects });
   } catch (err) {
     console.error('Error executing query', err);
     res.status(500).json({ error: 'Internal Server Error' });
